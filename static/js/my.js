@@ -22,7 +22,9 @@ $(document).ready(function () {
       if (data.ready) {
           var result = data.result;
           $('#txtOutput').val(data.result);
+          alert('Готово!');
       } else {
+          alert('Ищем ошибки...');
           setTimeout(function () {
               polling(task_id);
               }, 1000);

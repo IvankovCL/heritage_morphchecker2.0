@@ -17,6 +17,7 @@ from flask import Flask, render_template, request, jsonify
 import sys
 sys.path.insert(0, '.\morphchecker')
 import morphchecker
+import re
 
 flask_app = Flask(__name__)
 flask_app.config.update({
