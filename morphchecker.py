@@ -1,11 +1,11 @@
 import re, pymorphy2, nltk, time, sys
 #from wordsplitter import get_morphs, raspil
 from prjscript import morphSplitnCheck
-sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker/emeshch-spell-checker-a264623eaa3c')
+sys.path.append('emeshch-spell-checker-a264623eaa3c')
 from spell_checker import check_word 
          
 def saveAff():    
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker/test.aff', 'r', encoding='UTF-8') as aff:
+    with open('test.aff', 'r', encoding='UTF-8') as aff:
         affixes = []
         for line2 in aff:
             affixes.append(line2.split())       
@@ -72,7 +72,7 @@ def GramToAff(afflines):
 
 #создаёт словарь корней и алломорфов
 def Allomorphs():
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker/morphodict.csv', 'r', encoding='utf-8') as morphodict:
+    with open('morphodict.csv', 'r', encoding='utf-8') as morphodict:
         whole = []
         
         for line in morphodict:
@@ -136,7 +136,7 @@ def oneLemmaOnly(lst):
     
 #ищет код в файле dic    
 def codeFinder(given):
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker/ru_RU.dic', 'r', encoding='UTF-8') as dic:
+    with open('ru_RU.dic', 'r', encoding='UTF-8') as dic:
         codes = []
         for line in dic:
             if line.startswith(given + '/') == True:           
@@ -193,7 +193,7 @@ def spellcheck(wordToCheck):
     return errors, correct
 
 def naiveCheck(wordToCheck):
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker/All_Forms+.txt', 'r', encoding='utf-8') as file:
+    with open('All_Forms+.txt', 'r', encoding='utf-8') as file:
         allForms = file.read().split()
     if wordToCheck in allForms:
         return True

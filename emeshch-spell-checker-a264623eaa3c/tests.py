@@ -144,7 +144,7 @@ def aspell(string):
     если ошибка: True, aspell_sug
 
     '''
-    enchant.set_param("enchant.aspell.dictionary.path", "C:/Users/Ivankov/Desktop/RLC/emeshch-spell-checker-a264623eaa3c/aspell6-ru-0.99f7-1")
+    enchant.set_param("enchant.aspell.dictionary.path", "emeshch-spell-checker-a264623eaa3c/aspell6-ru-0.99f7-1")
     d = enchant.Dict("ru_RU")
     if d.check(string):      # aspell says OK
         # print('aspell says OK')
@@ -419,41 +419,5 @@ def get_transpositions():
                                 skip = True
 
 # get_transpositions()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -8,10 +8,7 @@ $(document).ready(function () {
 		});
 	});
 });
-    
-$(document).ready(function() {
-	$('#demoForm').hide()
-});
+
 
 $('input[name=demo]').click(function ()
      {
@@ -19,5 +16,6 @@ $('input[name=demo]').click(function ()
 		 $('#demoForm').show()
      }
 );
+
 
 
