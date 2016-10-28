@@ -61,13 +61,25 @@ def index():
 def data():
     request.get_data()
     givenWord = request.data.decode('utf-8')
-    task_id = our_function(givenWord)
-    #task_id = our_function.delay(givenWord)
+    #task_id = our_function(givenWord)
+    task_id = our_function.delay(givenWord)
     #async_result = celery.AsyncResult(task_id)
 
     return jsonify({
-        #'answer': str(async_result.result)
-        'answer': str(task_id[givenWord])
+        #'answer': str(task_id.result),
+        'task_id': str(task_id)
+        #'answer': str(task_id[givenWord])
+    })
+	
+@flask_app.route('/result/<task_id>')
+def result(task_id):
+    async_result = celery.AsyncResult(task_id)
+
+    return jsonify({
+        'ready': async_result.ready(),
+        'status': async_result.status,
+        'result': str(async_result.result),
+        'task_id': str(async_result.task_id)
     })
 
 if __name__ == '__main__':

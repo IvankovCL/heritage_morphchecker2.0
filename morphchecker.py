@@ -1,11 +1,11 @@
 import re, pymorphy2, nltk, time, sys
 #from wordsplitter import get_morphs, raspil
 from prjscript import morphSplitnCheck
-sys.path.append('emeshch-spell-checker-a264623eaa3c')
+sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/emeshch-spell-checker-a264623eaa3c')
 from spell_checker import check_word 
          
 def saveAff():    
-    with open('test.aff', 'r', encoding='UTF-8') as aff:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/test.aff', 'r', encoding='UTF-8') as aff:
         affixes = []
         for line2 in aff:
             affixes.append(line2.split())       
@@ -72,7 +72,7 @@ def GramToAff(afflines):
 
 #создаёт словарь корней и алломорфов
 def Allomorphs():
-    with open('morphodict.csv', 'r', encoding='utf-8') as morphodict:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/morphodict.csv', 'r', encoding='utf-8') as morphodict:
         whole = []
         
         for line in morphodict:
@@ -136,7 +136,7 @@ def oneLemmaOnly(lst):
     
 #ищет код в файле dic    
 def codeFinder(given):
-    with open('ru_RU.dic', 'r', encoding='UTF-8') as dic:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/ru_RU.dic', 'r', encoding='UTF-8') as dic:
         codes = []
         for line in dic:
             if line.startswith(given + '/') == True:           
@@ -185,15 +185,15 @@ def spellcheck(wordToCheck):
     if naiveCheck(wordToCheck) == True:
         print('Всё правильно: %s' %wordToCheck)
         errors = {wordToCheck: wordToCheck} 
-        print(errors)		
-        correct = True		
+        print(errors)        
+        correct = True        
     else:
         spellChecked = check_word(wordToCheck, ' ', ' ', accent_mistakes={}, big_ru={},  multiword=False )['mistake']
         errors = {wordToCheck: spellChecked}
     return errors, correct
 
 def naiveCheck(wordToCheck):
-    with open('All_Forms+.txt', 'r', encoding='utf-8') as file:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/All_Forms+.txt', 'r', encoding='utf-8') as file:
         allForms = file.read().split()
     if wordToCheck in allForms:
         return True
@@ -313,11 +313,14 @@ def morphcheck(errors, correct):
                                         needed = re.sub(old.replace('0', '') + '$', new, lemma)
                                         output[error].add(needed.replace('0', ''))    
 
-        with open('output.txt', 'a', encoding = 'utf-8') as outfile:                           
+        """with open('output.txt', 'a', encoding = 'utf-8') as outfile:                           
             for out in output:
                 print(str(out) + ' ' + str(output[out]) + '\n')        
-                outfile.write(str(out) + ' ' + str(output[out]) + '\n')
-            
+                outfile.write(str(out) + ' ' + str(output[out]) + '\n')"""
+ 
         print(time.time() - start_time)
+        for out in output:
+            if output[out]:
+               output[out] == 'нет ответа'
     return output
         

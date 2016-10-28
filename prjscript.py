@@ -49,7 +49,7 @@ class kuznec:
     
     cashline = []
     
-    with open('morphodict2.csv', 'r', encoding = 'utf-8') as slovar:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/morphodict2.csv', 'r', encoding = 'utf-8') as slovar:
         next(slovar)
     
         for line in slovar:
