@@ -9,8 +9,8 @@ $(document).ready(function () {
     });    
     $("#send").click(function() {
         $.post('/data', $('#txtInput').val(), function(data) {
-			$('#txtOutput').val(data.result)
-			polling(data.task_id);
+            $('#txtOutput').val(data.result)
+            polling(data.task_id);
         });
     });    
     var polling = function (task_id) {
