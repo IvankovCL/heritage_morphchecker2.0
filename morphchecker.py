@@ -319,8 +319,5 @@ def morphcheck(errors, correct):
                 outfile.write(str(out) + ' ' + str(output[out]) + '\n')"""
  
         print(time.time() - start_time)
-        for out in output:
-            if output[out]:
-               output[out] == 'нет ответа'
     return output
         
