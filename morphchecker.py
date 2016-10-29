@@ -112,32 +112,32 @@ def load_allomorphs():
 # проверяет, совпадают ли корни или алломорфы
 
 
-def is_allomorph(lemma, root, variantRoot, allomDict):
-    if lemma in allomDict:  # если лемма есть в словаре Кузнецовой
+def is_allomorph(lemma, root, variant_root, allomorph_dict):
+    if lemma in allomorph_dict:  # если лемма есть в словаре Кузнецовой
         # регулярка - список алломорфов для леммы (вод|важд|вед)
-        regexp = '^(' + re.sub('[0-9]', '', allomDict[lemma]) + ')'
+        regexp = '^(' + re.sub('[0-9]', '', allomorph_dict[lemma]) + ')'
         print('Возможные алломорфы корня %s: %s \n' % (root, regexp))
 
-        if re.match(regexp, root) != None and re.match(regexp, variantRoot) != None:
-            sys.stdout.write('Корень ' + root + ' - алломорф корня ' + variantRoot + '\n')
+        if re.match(regexp, root) != None and re.match(regexp, variant_root) != None:
+            sys.stdout.write('Корень ' + root + ' - алломорф корня ' + variant_root + '\n')
             return True              
         else:
             sys.stdout.write('Не аллломорф' + '\n')
-            if root == variantRoot:
+            if root == variant_root:
                 sys.stdout.write('Один и тот же корень' + '\n')
                 return True
             
             else:
-                sys.stdout.write(root + ' не равно ' + variantRoot + '\n')
+                sys.stdout.write(root + ' не равно ' + variant_root + '\n')
                 sys.stdout.write('Корни разные' + '\n')
                 return False
     else:
         sys.stdout.write('Леммы нет в словаре Кузнецовой' + '\n')
-        if root == variantRoot:
+        if root == variant_root:
             sys.stdout.write('Один и тот же корень' + '\n')
             return True
         else:
-            sys.stdout.write(root + ' не равно ' + variantRoot + '\n')
+            sys.stdout.write(root + ' не равно ' + variant_root + '\n')
             sys.stdout.write('Корни разные' + '\n')
             return False
 
@@ -246,17 +246,17 @@ def morphcheck(errors, correct):
             
             output[error] = set()
 
-            # Word Splitting===================================================================
-            #morphs = raspil(error) 
+            # Word Splitting
+            # morphs = raspil(error) 
             morphs = morphSplitnCheck(error)
-            #stem = morphs[1][1]
+            # stem = morphs[1][1]
             stem = stemmer.stem(error) 
-            #root = morphs[0][0][0]
+            # root = morphs[0][0][0]
             root = morphs.root
-            #flexion = error.replace(stem, '')
+            # flexion = error.replace(stem, '')
             flexion = morphs.ending[0]
 
-            #затыкаем кое-какие дыры        
+            # затыкаем кое-какие дыры        
             flexion = re.sub('^н', '', flexion)        
             if re.search('^(ющ|ящ|ущ|ащ|щ|вш)', flexion) == True:
                 flexion = re.sub('^(ющ|ящ|ущ|ащ|щ|вш)', '', flexion)
