@@ -1,44 +1,36 @@
-# -*- coding: utf-8 -*-
-
-
-# ------------------------------------- QUICK GUIDE FOR USAGE -----------------------------------------------
-# run the script. you should have acces to the terminal afterwards.
-#
-# to createa morphsplitter instance assing to any variable morphSplitnCheck('YOUR WORD HERE')
-#
-# EXAMPLE: t = morphSplitnCheck('постреляный')
-#
-# to access to a separated word, type t.separated
-# for morphemes:
-# 
-# root -> t.root
-# prefix -> t.prefix
-# suffix -> t.suffix
-# ending -> t.ending
-#
-#
-# to produce a csv with separated words, use goThroughCorpus(inp, outputPath)
-#
-# input should be an array with each element being a target word
-#
-#
-#
-
-
-
-
 from nltk.stem import snowball as stem
 
 vowels = ['а', 'у', 'о', 'ы', 'и', 'э', 'я', 'ю', 'ё', 'е']
+"""
+mistakes = []
+text = open('mistakes.txt', 'r') 
+for line in text:
+    line = line.split()
+    lc = ''
+    for i in line:
+        
+        if i[0] != '(':
+            lc = lc + i + ' '
+        else:
+            break
+    mistakes.append(lc.replace(',','').split())
+text.close()
+    
+mistakes2 = []
 
+mist = open('testset.txt','r',encoding = 'utf-8')
 
+for line in mist:
+    mistakes2.append(line.replace('\n',''))
+
+mist.close()"""
 stmr = stem.RussianStemmer()
 
 # for item in mistakes:
  #   cash = []
  #   for word in item:
  #       cash.append(stmr.stem(word))
-#    ###print(cash)
+#    print(cash)
 
 
 
@@ -49,14 +41,14 @@ class kuznec:
     
     cashline = []
     
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/morphodict2.csv', 'r', encoding = 'utf-8') as slovar:
+    with open('morphodict2.csv', 'r', encoding = 'utf-8') as slovar:
         next(slovar)
     
         for line in slovar:
             line = line.split(';')
             if line[0] not in worddict:
                 worddict[line[0]] = {}  
-            
+    
             worddict[line[0]].update({line[3] : {'morph' : line[1], 'status' : line[2], 'place' : line[3], 'allo' : line[4].split('|'), 'pos' : line[5].replace('\n','')}})
             if line[2] == 'корень':
                 rootdict.append(line[1])
@@ -87,23 +79,23 @@ rootdict = kuzdra.rootdict
 #            if worddict[word][str(pl)]['status'] == 'суффикс':
 #                wcash.append(worddict[word][str(pl)]['morph'])
 #        except:
-#            ###print('boink!')
+#            print('boink!')
 #            pass
 #    mrph = set(wcash)
 
 
 
-# ###print(stmr.stemmmm('изменяющимися'))
+# print(stmr.stemmmm('изменяющимися'))
 
 
-
+# VSE KAKIE EST SUFFIXI NA KONCE ZAPISIVAET
 def get_sfx(text, suffix):
     sfxcash = []
     for i in suffix:
-#        ###print(i)
+#        print(i)
         if text.endswith(i):
             sfxcash.append(i)
-            ###print('суффикс ' + i + ' !!!')
+            print('суффикс ' + i + ' !!!')
     return(sfxcash)
 
 def strip_end(text, suffix, scheck = 0):
@@ -119,7 +111,7 @@ def strip_end(text, suffix, scheck = 0):
             
                     
         else:
-            ###print('VOWELCOUNT INSUFFICIENT')
+            print('VOWELCOUNT INSUFFICIENT')
             return([text,''])   
     else:
         return(text[:len(text)-len(suffix)])
@@ -129,7 +121,7 @@ def strip_end(text, suffix, scheck = 0):
 #    prcash = []
 #    for i in prst:
 #        if text.startswith(i):
-#            ###print('Приставка ' + i + ' !!!')
+#            print('Приставка ' + i + ' !!!')
 #            prcash.append(i)
             
 class prefixwork:
@@ -141,7 +133,7 @@ class prefixwork:
         
         for i in prst:
             if text.startswith(i):
-                ###print(' CLASSNAJA Приставка ' + i + ' !!!')
+                # print(' CLASSNAJA Приставка ' + i + ' !!!')
                 vowelcount = 0
                 for s in vowels:
                     
@@ -165,7 +157,36 @@ class prefixwork:
             self.ostatok = text
             self.maxprefix = ''
         
+class postfixwork:
+    def get_postfix(self, text, post):
+        self.postfixlist = ['']
+        
+        for i in post:
+            if text.endswith(i):
+                # print(' CLASSNAJA okon4anie ' + i + ' !!!')
+                vowelcount = 0
+                for s in vowels:
                     
+                    vowelcount = vowelcount + text[:len(text)-len(i)].count(s)
+                self.vowelcount = vowelcount
+                if vowelcount > 0:
+#                    ostatok = text[len(i):]
+                    self.postfixlist.append(i)
+    def strip_end(self):
+        if len(self.postfixlist) > 0:
+            self.maxpostfix = max(self.postfixlist, key = len)
+            
+    def __init__(self, text, post = stmr.gtpost()):
+        self.get_postfix(text, post)
+        self.strip_end()
+    
+        if len(self.postfixlist) > 0:
+            self.ostatok = text[:len(text)-len(self.maxpostfix)]
+        else:
+            self.ostatok = text
+            self.maxpostfix = ''
+    
+    
 
                 
 def get_syll(word):
@@ -181,10 +202,10 @@ def get_syll(word):
     
     
 def recheck(word):
-    ###print('RECHECK WITH PRSYLL IS BEING RUN')
-    ###print(word)
+    print('RECHECK WITH PRSYLL IS BEING RUN')
+    print(word)
     if word in rootdict:
-        ###print('STRIKE WORD')
+        print('STRIKE WORD')
         return((word,1))
 # A-ROOT STEP -----------------------------------------------------------------
     if word.endswith('а'):
@@ -196,12 +217,12 @@ def recheck(word):
             maxARoot = (max(arootDict, key = len))
             prst = word[:len(word) - len(maxARoot)]
             if prst in stmr.gtprst(): 
-                ###print('STRIKE A-ROOT')
+                print('STRIKE A-ROOT')
                 return([maxARoot, prst, ''],5)
 
     nopr = prefixwork(word)
     if nopr.ostatok in rootdict:
-        ###print('STRIKE SOLO PR')
+        print('STRIKE SOLO PR')
         return([nopr.ostatok, nopr.maxprefix, ''],2)
     sfxrtcash = {}
     for i in get_sfx(word, stmr.gtsfx()):
@@ -215,21 +236,28 @@ def recheck(word):
             if strip_end(nopr.ostatok, i) in rootdict:
                 sfxrtcash.update({strip_end(nopr.ostatok, i) : i})
     if len(sfxrtcash) > 0:
-        ###print('SUTORAIKU SFX!')    
+        print('SUTORAIKU SFX!')    
         maxkey = (max(list(sfxrtcash.keys()), key = len))
         return([maxkey, nopr.maxprefix, sfxrtcash[maxkey]],3)
     
         
           
+def hicc():
+    print('a')         
+  
               
     
 def get_root(text):
-    word = stmr.stemmmm(text)[1]
-    prtr = stmr.stemmmm(text)[2][0]
-    ###print(prtr)
-    ###print(word)
+    global prtr
+    word = postfixwork(text)
+    prtr = word.maxpostfix
+    word = word.ostatok
+#    word = stmr.stemmmm(text)[1]
+#    prtr = stmr.stemmmm(text)[2][0]
+    print(prtr)
+    print(word)
     nopr = None
-#    ###print(word)
+#    print(word)
 #    fst = 
 #    ffst = strip_end(word, stmr.gtsfx())
 #    fnl = strip_start(strip_end(word,stmr.gtsfx())[0],stmr.gtprst())
@@ -237,27 +265,27 @@ def get_root(text):
     
 # FIRST STEP ------------------------------------------------------------------    
     if word in rootdict:
-        ###print('STRIKE WORD')
+        print('STRIKE WORD')
         return((word,1))
 # FIRST STEP END --------------------------------------------------------------
 # A-ROOT STEP -----------------------------------------------------------------
     if word.endswith('а'):
         arootDict = []
         for i in stmr.gtart():
-#            ###print(i)
+#            print(i)
             if word.endswith(i):
                 arootDict.append(i)
         if len(arootDict) > 0:
             maxARoot = (max(arootDict, key = len))
             prst = word[:len(word) - len(maxARoot)]
             if prst in stmr.gtprst(): 
-                ###print('STRIKE A-ROOT')
+                print('STRIKE A-ROOT')
                 return([maxARoot, prst, ''],5)
 
 # SECOND STEP -----------------------------------------------------------------
     nopr = prefixwork(word)
     if nopr.ostatok in rootdict:
-        ###print('STRIKE SOLO PR')
+        print('STRIKE SOLO PR')
         return([nopr.ostatok, nopr.maxprefix, ''],2)
 # SECOND STEP END -------------------------------------------------------------
 # THIRD STEP ------------------------------------------------------------------
@@ -273,27 +301,23 @@ def get_root(text):
             if strip_end(nopr.ostatok, i) in rootdict:
                 sfxrtcash.update({strip_end(nopr.ostatok, i) : i})
     if len(sfxrtcash) > 0:
-        ###print('SUTORAIKU SFX!')    
+        print('SUTORAIKU SFX!')    
         maxkey = (max(list(sfxrtcash.keys()), key = len))
         return([maxkey, nopr.maxprefix, sfxrtcash[maxkey]],3)
     tweakword = word + get_syll(prtr)
-    ###print('ITO TWEAKWORD - ' + tweakword)
+    print('ITO TWEAKWORD - ' + tweakword)
     twres = recheck(tweakword)
     if twres != None:
         return twres
    
-    print(get_sfx(word,stmr.gtsfx()))
-    if get_sfx(word,stmr.gtsfx()):
-        mxsfx =  max(get_sfx(word,stmr.gtsfx()), key = len)
-    else:
-         mxsfx = ''
+    mxsfx =  max(get_sfx(word,stmr.gtsfx()), key = len)
     
 #    rezanoe = strip_start(strip_end(word,mxsfx),stmr.gtprst())
     rezanoe = prefixwork(strip_end(word,mxsfx))
     
     fnl = [rezanoe.ostatok, rezanoe.maxprefix, mxsfx]
-#    ###print(fnl)
-#    ###print('asdasdsd')
+#    print(fnl)
+#    print('asdasdsd')
     
     return(fnl,4)
     
@@ -304,17 +328,17 @@ def get_root(text):
 #
 #def get_root(text):
 #    word = stmr.stemmmm(text)[1]
-#    ###print(word)
-#    ###print(word)
+#    print(word)
+#    print(word)
 #    fst = 
 #    ffst = strip_end(word, stmr.gtsfx())
 #    fnl = strip_start(strip_end(word,stmr.gtsfx())[0],stmr.gtprst())
 #    if word in rootdict:
-#        ###print('STRIKE WORD')
+#        print('STRIKE WORD')
 #        return((word,1))
 #    nopr = strip_start(word, stmr.gtprst())
 #    if nopr[0] in rootdict:
-#        ###print('STRIKE SOLO PR')
+#        print('STRIKE SOLO PR')
 #        return([nopr[0],nopr[1],''],2)
 #    sfxrtcash = {}
 #    for i in get_sfx(word, stmr.gtsfx()):
@@ -328,14 +352,14 @@ def get_root(text):
 #            if strip_end(nopr[0], i) in rootdict:
 #                sfxrtcash.update({strip_end(nopr[0], i) : i})
 #    if len(sfxrtcash) > 0:
-#        ###print('SUTORAIKU SFX!')    
+#        print('SUTORAIKU SFX!')    
 #        maxkey = (max(list(sfxrtcash.keys()), key = len))
 #        return([maxkey, nopr[1], sfxrtcash[maxkey]],3)
 #    mxsfx =  max(get_sfx(word,stmr.gtsfx()), key = len)
 #    rezanoe = strip_start(strip_end(word,mxsfx),stmr.gtprst())
 #    fnl = [rezanoe[0], rezanoe[1], mxsfx]
-#    ###print(fnl)
-#    ###print('asdasdsd')
+#    print(fnl)
+#    print('asdasdsd')
     
 #    return(fnl,4)
     
@@ -383,7 +407,7 @@ class separator:
             
             self.morphList = [self.prefix,self.root,self.suffix]
             
-            ###print('MORPHEMES AVAILABLE')
+            print('MORPHEMES AVAILABLE')
         
             popil = pr + ':' + root + ':' + sfx   
             self.separated = ''
@@ -393,7 +417,6 @@ class separator:
             self.separated += ':'.join(stmr.suffixlist)
             if self.separated.endswith(':'):
                 self.separated[:-1]
-            
         else:
             popil = rslt[0]
             self.root = popil
@@ -401,7 +424,6 @@ class separator:
             self.separated = self.root + ':' + ':'.join(stmr.suffixlist)
             if self.separated.endswith(':'):
                 self.separated[:-1]
-        self.ending = stmr.suffixlist
         if self.reflexiveRemoved:
             
             self.separated = self.separated + ':' + self.originalWord[-2:]
@@ -411,8 +433,8 @@ class separator:
         for i,m in enumerate(self.morphList):
             self.enumerated.append((m,i))
         
-#        ###print(rslt[0])
-    #    ###print(stcash)
+#        print(rslt[0])
+    #    print(stcash)
         
         return([rslt,stcash[:3], popil])
     def __init__(self,word):
@@ -429,10 +451,10 @@ class kuznecFinder(kuznec, separator):
             rootFound = False
             for pos in self.worddict[word]:
                 pos = self.worddict[word][pos]
-               # ###print(pos)
+               # print(pos)
                 if (pos['status'] == 'корень' and pos['morph'] == root):
                     rootFound = True
-                    ###print('NAWEL! ' + word)
+                    print('NAWEL! ' + word)
                     break
             if rootFound:
                 self.wordlist.append(word)
@@ -472,10 +494,10 @@ class kuznecFinder(kuznec, separator):
             if (mPos != None and rPos != None):
                 empDelta = int(rPos) - int(mPos)
                 if empDelta == bundle[0]:
-                    ###print('Yeach that is the word - ' + word)
+                    print('Yeach that is the word - ' + word)
                     return(True)
                     break
-        ###print('MORPHEME SHALL NOT PASS!')
+        print('MORPHEME SHALL NOT PASS!')
         return(False)
 
 
@@ -483,6 +505,7 @@ class kuznecFinder(kuznec, separator):
 class morphSplitnCheck(kuznecFinder):
     def __init__(self,word):
         self.raspil(word)
+        self.postfix = prtr
         
     def do_check(self,morph):
         self.notinit(self.root)
@@ -492,10 +515,7 @@ class morphSplitnCheck(kuznecFinder):
 def goThroughCorpus(inp, outputPath):
     csvCash = 'Original\tSeparated\n'
     for item in inp:
-        print(item)
         t = morphSplitnCheck(item)
-        print(t.separated)
-        print(t.initOutcome)
         csvCash += t.originalWord + '\t' + t.separated + '\n'
     dumpling = open(outputPath, 'w', encoding = 'utf-8')
     dumpling.write(csvCash)
@@ -510,7 +530,7 @@ def goThroughCorpus(inp, outputPath):
 #    if i.endswith('а'):
 #        adict.append(i)
         
-####print(set(adict))
+#print(set(adict))
 
 
 
@@ -537,9 +557,9 @@ def goThroughCorpus(inp, outputPath):
 #                wrd = raspil(w)
 #                wcash = wcash + 'Original : ' + w + '\n' + 'Separated: ' + wrd[2] + '\nSep. full: ' + wrd[2]+':'+':'.join(wrd[1][2]) + '\n\n\n'
 #            except:
-#                ###print('4eto powlo ne tak')
+#                print('4eto powlo ne tak')
 #            
-#    ###print(wcash)
+#    print(wcash)
  #   dump.write(wcash)
  #   dump.close()
     
@@ -547,4 +567,4 @@ def goThroughCorpus(inp, outputPath):
 
 #for i in tuple(set(morphdict)):
 #    if word.endswith(i):
-#        ###print(strip_end(word,i))
+#        print(strip_end(word,i))

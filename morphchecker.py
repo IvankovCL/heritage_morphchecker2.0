@@ -247,14 +247,10 @@ def morphcheck(errors, correct):
             output[error] = set()
 
             # Word Splitting
-            # morphs = raspil(error) 
             morphs = morphSplitnCheck(error)
-            # stem = morphs[1][1]
             stem = stemmer.stem(error) 
-            # root = morphs[0][0][0]
             root = morphs.root
-            # flexion = error.replace(stem, '')
-            flexion = morphs.ending[0]
+            flexion = morphs.postfix
 
             # затыкаем кое-какие дыры        
             flexion = re.sub('^н', '', flexion)        
@@ -279,7 +275,7 @@ def morphcheck(errors, correct):
                 # lemma = parsed.normalized.word.replace('ё', 'е')
                 
                 lemma = variant           
-                pos = parsed.tag.pos
+                pos = parsed.tag.POS
 
                 # затыкаем дыры в словаре .aff
                 if stem == 'лучш':
@@ -298,7 +294,7 @@ def morphcheck(errors, correct):
                     for p in parsed:
                         if p.tag.pos == 'ADJF':
                             lemma = p.normalized.word.replace('ё', 'е')
-                            pos = p.tag.pos
+                            pos = p.tag.POS
                             continue
 
                 if lemma == 'сосед':
