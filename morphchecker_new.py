@@ -45,15 +45,18 @@ class Rulebook:
                                                 new=morph,
                                                 condition=rule[4], 
                                                 gram=tag
-                                                ))
+                                                )
+                                           )
+            
         self.morphs_for_tag = self.extend(morphs_for_tag)
         self.rules_for_code = rules_for_code
 
  
-    def rules_for_lemma(self, lemma):               
+    def rules_for_lemma(self, lemma, grams=[]):               
         return [rule
                 for code in self.codes_for_lemma[lemma]
-                for rule in self.rules_for_code[code]]
+                for rule in self.rules_for_code[code]
+                if rule.gram in grams]
     
     def tags_for_morph(self, morph):
         return {tag
@@ -63,17 +66,16 @@ class Rulebook:
     def pos_for_lemma(self, lemma):
         return self.rules_for_lemma(lemma)[0].gram[:4]            
 
-    def apply_rule(self, rule, lemma, grams=[]):
+    def apply_rule(self, rule, lemma):
         if re.search(rule.condition.replace('0', '') + '$', lemma) != None:
             return re.sub(rule.old.replace('0', '') + '$', rule.new, lemma)
 
     def extend(self, grammar):
         no_adj_noun = {'ая', 'яя', 'ее', 'ое', 'и', 'ы', 'ев', 'ей', 'ем', 'ом', 'ов', 'ет'}
+        no_verb = {'и'}
         grammar['ADJF.им.п.м.р.'] = grammar['ADJF.им.п.м.р.'].difference(no_adj_noun)
         grammar['NOUN.им.п.м.р.'] = grammar['NOUN.им.п.м.р.'].difference(no_adj_noun) 
-        no_verb = {'и'}
-        grammar['VERB.инф.'] = grammar['VERB.инф.'].difference(no_verb)        
-
+        grammar['VERB.инф.'] = grammar['VERB.инф.'].difference(no_verb)
         grammar['NOUN.ед.ч.т.п.'].update(['ией', 'ием'])        # МОЖЕТ И НЕ ПРИГОДИТЬСЯ
         grammar['NOUN.мн.ч.р.п.'].update(['иев'])               # для случаев типа "загрязненией", "фантазием"
         grammar['ADJF.мн.ч.т.п.'].update(['ами', 'имы'])        # для случаев типа "руссками"
@@ -83,13 +85,14 @@ class Rulebook:
 class Allomorphs(kuznec):
    
     def __init__(self):
-        self.allomorphs = defaultdict(None,
+        self.allomorphs = defaultdict(str,
                                        {self.worddict[item][place]['morph']:self.worddict[item][place]['allo']
                                         for item in self.worddict
                                         for place in self.worddict[item]
                                         if 'status' in self.worddict[item][place]
                                         and self.worddict[item][place]['status'] == 'корень'
-                                        and self.worddict[item][place]['allo']}
+                                        and self.worddict[item][place]['allo']
+                                        }
                                        )
         
     def is_allomorph(self, variant_root, error_root):
@@ -101,34 +104,51 @@ class Allomorphs(kuznec):
 class Morphchecker():
     
     def __init__(self):
-        self.stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=False)
+        # self.stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=False)
         self.pm2 = pymorphy2.MorphAnalyzer()
-        self.al = Allomorphs()
         self.rb = Rulebook()
+        self.al = Allomorphs()
 
     def spellcheck(self, word):
         spellchecked = check_word(word, ' ', ' ',
-                                  accent_mistakes={}, big_ru={},
+                                  accent_mistakes={},
+                                  big_ru={},
                                   multiword=False)
         if spellchecked['correct']:
-            return spellchecked['correct']
+            print(True)
+            return spellchecked['correct'], True
         else:
-            return spellchecked['mistake']
+            return spellchecked['mistake'], False
         
     def lemma_merge(self, variants):
         return list({self.pm2.parse(re.sub('[^а-яА-Я]', ' ', variant))[0].normalized.word.replace('ё', 'е')
-                    for variant in variants})     
+                    for variant in variants})
 
+    def init_forms(self, tags):
+        for init_form in ['NOUN.им.п.м.р.', 'ADJF.им.п.м.р.', 'ADJS.им.п.м.р.', 'VERB.инф.']:
+            if init_form in tags:
+                return True
+            
     def morphcheck(self, word):
+        
+        word = word.replace('ё', 'е')
         morphs = morphSplitnCheck(word)
-        suggestions = set()
-        for lemma in self.lemma_merge(self.spellcheck(word)):
-            tags = self.rb.tags_for_morph(morphs.postfix)
-            if self.al.is_allomorph(morphSplitnCheck(lemma).root, morphs.root) == True:
-                for rule in self.rb.rules_for_lemma(lemma):
-                    corrected = self.rb.apply_rule(rule, lemma, grams=tags)
-                    if corrected is not None:
-                        suggestions.add(corrected.replace('0', ''))
+        tags = self.rb.tags_for_morph(morphs.postfix)
+        spellchecked, is_correct = self.spellcheck(word)
+        
+        if is_correct == True:
+            suggestions = spellchecked
+        else:
+            suggestions = []
+            for lemma in self.lemma_merge(spellchecked):
+                if self.al.is_allomorph(morphSplitnCheck(lemma).root, morphs.root) == True:
+                    for rule in self.rb.rules_for_lemma(lemma, grams=tags):
+                        corrected = self.rb.apply_rule(rule, lemma)
+                        if corrected is not None:
+                            suggestions.append(corrected.replace('0', ''))
+                if self.init_forms(tags):
+                    suggestions.append(lemma)                    
+            
         return suggestions
    
     def tokenize(self, text):
