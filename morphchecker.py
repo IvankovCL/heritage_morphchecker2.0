@@ -5,12 +5,12 @@ import time
 import sys
 from prjscript import morphSplitnCheck
 # from wordsplitter import get_morphs, raspil
-sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/emeshch-spell-checker-a264623eaa3c')
+sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word
 
 
 def load_affixes():
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/test.aff',
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.aff',
               'r',
               encoding='UTF-8') as aff:
         affixes = []
@@ -83,7 +83,7 @@ def gram_to_affix(afflines):
 
 
 def load_allomorphs():
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/morphodict.csv',
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/morphodict.csv',
               'r',
               encoding='utf-8') as morphodict:
         whole = []
@@ -154,7 +154,7 @@ def one_lemma_only(lst):
     
 #ищет код в файле dic    
 def code_finder(given):
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/ru_RU.dic', 'r', encoding='UTF-8') as dic:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.dic', 'r', encoding='UTF-8') as dic:
         codes = []
         for line in dic:
             if line.startswith(given + '/') == True:           
@@ -213,7 +213,7 @@ def spellcheck(word_to_check):
     return errors, correct
 
 def naivecheck(word_to_check):
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/All_Forms+.txt', 'r', encoding='utf-8') as file:
+    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/All_Forms+.txt', 'r', encoding='utf-8') as file:
         all_forms = file.read().split()
     if word_to_check in all_forms:
         return True

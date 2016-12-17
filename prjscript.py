@@ -41,7 +41,7 @@ class kuznec:
     
     cashline = []
     
-    with open('morphodict2.csv', 'r', encoding = 'utf-8') as slovar:
+    with open('resources/morphodict.csv', 'r', encoding = 'utf-8') as slovar:
         next(slovar)
     
         for line in slovar:

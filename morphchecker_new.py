@@ -12,7 +12,7 @@ class Rulebook:
     
     def __init__(self):
                     
-        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/ru_RU.dic', 'r', encoding='UTF-8') as lines:
+        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.dic', 'r', encoding='UTF-8') as lines:
             wordlist = [line.split('/') for line in lines if '/' in line]
         
         self.codes_for_lemma = defaultdict(list,
@@ -20,7 +20,7 @@ class Rulebook:
                                             for entry in wordlist}
                                            )
             
-        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/ru_RU.aff', 'r', encoding='UTF-8') as rawRules:
+        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.aff', 'r', encoding='UTF-8') as rawRules:
             rules = [rawRule.split() for rawRule in rawRules
                      if 'SFX' in rawRule and ' Y ' not in rawRule]
             
