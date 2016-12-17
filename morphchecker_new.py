@@ -72,17 +72,30 @@ class Rulebook:
         grammar['ADJF.им.п.м.р.'] = grammar['ADJF.им.п.м.р.'].difference(no_adj_noun)
         grammar['NOUN.им.п.м.р.'] = grammar['NOUN.им.п.м.р.'].difference(no_adj_noun) 
         no_verb = {'и'}
-        grammar['VERB.инф.'] = grammar['VERB.инф.'].difference(no_verb)
+        grammar['VERB.инф.'] = grammar['VERB.инф.'].difference(no_verb)        
 
-        # ====================МОЖЕТ И НЕ ПРИГОДИТЬСЯ
-        # для случаев типа "загрязненией", "фантазием"
-        grammar['NOUN.ед.ч.т.п.'].add('ией')
-        grammar['NOUN.ед.ч.т.п.'].add('ием')
-        grammar['NOUN.мн.ч.р.п.'].add('иев')
-        # для случаев типа "руссками"
-        grammar['ADJF.мн.ч.т.п.'].add('ами')
-        grammar['ADJF.мн.ч.т.п.'].add('имы')
+        grammar['NOUN.ед.ч.т.п.'].update(['ией', 'ием'])        # МОЖЕТ И НЕ ПРИГОДИТЬСЯ
+        grammar['NOUN.мн.ч.р.п.'].update(['иев'])               # для случаев типа "загрязненией", "фантазием"
+        grammar['ADJF.мн.ч.т.п.'].update(['ами', 'имы'])        # для случаев типа "руссками"
         return grammar
+
+    
+class Allomorphs(kuznec):
+   
+    def __init__(self):
+        self.allomorphs = defaultdict(None,
+                                       {self.worddict[item][place]['morph']:self.worddict[item][place]['allo']
+                                        for item in self.worddict
+                                        for place in self.worddict[item]
+                                        if 'status' in self.worddict[item][place]
+                                        and self.worddict[item][place]['status'] == 'корень'
+                                        and self.worddict[item][place]['allo']}
+                                       )
+        
+    def is_allomorph(self, variant_root, error_root):
+        regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
+        if re.match(regexp, variant_root) != None:
+            return True
 
 
 class Morphchecker():
@@ -104,100 +117,25 @@ class Morphchecker():
         
     def lemma_merge(self, variants):
         return list({self.pm2.parse(re.sub('[^а-яА-Я]', ' ', variant))[0].normalized.word.replace('ё', 'е')
-                    for variant in variants})
-
-    def root_filter(self, variant):
-        variant_morphs = morphSplitnCheck(variant)
-        variant_root = variant_morphs.root
-
-    def is_allomorph(self):
-        # if is_allomorph(lemma, root, variant_root, allomorph_dict[0]) == True:
-        pass        
+                    for variant in variants})     
 
     def morphcheck(self, word):
-        ending = morphSplitnCheck(word).postfix
+        morphs = morphSplitnCheck(word)
         suggestions = set()
         for lemma in self.lemma_merge(self.spellcheck(word)):
-            tags = self.rb.tags_for_morph(ending)
-            for rule in self.rb.rules_for_lemma(lemma):
-                corrected = self.rb.apply_rule(rule, lemma, grams=tags)
-                if corrected is not None:
-                    suggestions.add(corrected.replace('0', ''))
+            tags = self.rb.tags_for_morph(morphs.postfix)
+            if self.al.is_allomorph(morphSplitnCheck(lemma).root, morphs.root) == True:
+                for rule in self.rb.rules_for_lemma(lemma):
+                    corrected = self.rb.apply_rule(rule, lemma, grams=tags)
+                    if corrected is not None:
+                        suggestions.add(corrected.replace('0', ''))
         return suggestions
    
     def tokenize(self, text):
         import string
         text = text.lower().split()
-        text = [token.strip(string.punctuation).replace('ё', 'е')
+        return [token.strip(string.punctuation).replace('ё', 'е')
                 for token in text if token not in string.punctuation]    
 
     def text_morphcheck(self, text):
-        # output = {word:morphcheck(word) for word in text}
         return [(word, self.morphcheck(word)) for word in self.tokenize(text)]
-
-
-class Allomorphs(kuznec):
-   
-    def __init__(self):
-        self.allomorphs = defaultdict('',
-                                      {self.worddict[item]['morph']:self.worddict[item]['allo']
-                                       for item in self.worddict
-                                       if 'status' in self.worddict[item]
-                                       and self.worddict[item]['status'] == 'корень'}
-                                      )
-
-
-    
-                           
-"""
-
-
-def load_allomorphs():
-    with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/morphodict.csv', 'r', encoding='utf-8') as morphodict:
-        allom_dict = [line.split(';') for line in morphodict]
-
-        allomorphs = {}
-        roots = set()
-        for part in allom_dict:
-            if part[2] == 'корень':
-                if part[4] != '':
-                    allomorphs[part[0]] = part[4].replace('ё', 'е')
-                else:
-                    if part[0] not in allomorphs:
-                        allomorphs[part[0]] = part[1].replace('ё', 'е')
-                roots.add(part[1])
-        return allomorphs, roots    
-
-
-# проверяет, совпадают ли корни или алломорфы
-
-
-def is_allomorph(lemma, root, variant_root, allomorph_dict):
-    if lemma in allomorph_dict:  # если лемма есть в словаре Кузнецовой
-        # регулярка - список алломорфов для леммы (вод|важд|вед)
-        regexp = '^(' + re.sub('[0-9]', '', allomorph_dict[lemma]) + ')'
-        print('Возможные алломорфы корня %s: %s \n' % (root, regexp))
-
-        if re.match(regexp, root) != None and re.match(regexp, variant_root) != None:
-            sys.stdout.write('Корень ' + root + ' - алломорф корня ' + variant_root + '\n')
-            return True              
-        else:
-            sys.stdout.write('Не аллломорф' + '\n')
-            if root == variant_root:
-                sys.stdout.write('Один и тот же корень' + '\n')
-                return True
-            
-            else:
-                sys.stdout.write(root + ' не равно ' + variant_root + '\n')
-                sys.stdout.write('Корни разные' + '\n')
-                return False
-    else:
-        sys.stdout.write('Леммы нет в словаре Кузнецовой' + '\n')
-        if root == variant_root:
-            sys.stdout.write('Один и тот же корень' + '\n')
-            return True
-        else:
-            sys.stdout.write(root + ' не равно ' + variant_root + '\n')
-            sys.stdout.write('Корни разные' + '\n')
-            return False 
-"""

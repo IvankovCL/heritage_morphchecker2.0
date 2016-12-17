@@ -49,7 +49,7 @@ class kuznec:
             if line[0] not in worddict:
                 worddict[line[0]] = {}  
     
-            worddict[line[0]].update({line[3] : {'morph' : line[1], 'status' : line[2], 'place' : line[3], 'allo' : line[4].split('|'), 'pos' : line[5].replace('\n','')}})
+            worddict[line[0]].update({line[3] : {'morph' : line[1], 'status' : line[2], 'place' : line[3], 'allo' : line[4], 'pos' : line[5].replace('\n','')}})
             if line[2] == 'корень':
                 rootdict.append(line[1])
                 
