@@ -1,7 +1,5 @@
 import re
 import pymorphy2
-import nltk
-import time
 import sys
 from collections import defaultdict, namedtuple
 from prjscript import morphSplitnCheck, kuznec
@@ -104,7 +102,6 @@ class Allomorphs(kuznec):
 class Morphchecker():
     
     def __init__(self):
-        # self.stemmer = nltk.stem.snowball.RussianStemmer(ignore_stopwords=False)
         self.pm2 = pymorphy2.MorphAnalyzer()
         self.rb = Rulebook()
         self.al = Allomorphs()
@@ -115,7 +112,6 @@ class Morphchecker():
                                   big_ru={},
                                   multiword=False)
         if spellchecked['correct']:
-            print(True)
             return spellchecked['correct'], True
         else:
             return spellchecked['mistake'], False
