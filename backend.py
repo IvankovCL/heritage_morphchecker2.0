@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 DEFAULT_PORT = 9000
 ADDITIVE_FOR_UID = 1000
 
@@ -14,9 +12,9 @@ from time import sleep
 
 from celery import Celery
 from flask import Flask, render_template, request, jsonify
-import sys
-sys.path.insert(0, '.\morphchecker')
-import morphchecker
+# import sys
+# sys.path.insert(0, '.\morphchecker')
+from morphchecker_new import Morphchecker
 import re
 
 flask_app = Flask(__name__)
@@ -48,9 +46,11 @@ celery = make_celery(flask_app)
 
 
 @celery.task
-def our_function(word):
-    errors, isCorrect = morphchecker.spellcheck(word)
-    return morphchecker.morphcheck(errors, isCorrect)
+def do_some_morphchecking(word):
+    m = Morphchecker()
+	return m.morphcheck(word)
+    # errors, isCorrect = morphchecker.spellcheck(word)
+    # return morphchecker.morphcheck(errors, isCorrect)
 
 
 @flask_app.route('/')
@@ -62,8 +62,8 @@ def index():
 def data():
     request.get_data()
     givenWord = request.data.decode('utf-8')
-    #task_id = our_function(givenWord)
-    task_id = our_function.delay(givenWord)
+    #task_id = do_some_morphchecking(givenWord)
+    task_id = do_some_morphchecking.delay(givenWord)
     #async_result = celery.AsyncResult(task_id)
 
     return jsonify({
