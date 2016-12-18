@@ -1,8 +1,8 @@
 import re
 import pymorphy2
-import sys
 from collections import defaultdict, namedtuple
 from prjscript import morphSplitnCheck, kuznec
+import sys
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word 
 
@@ -99,7 +99,7 @@ class Allomorphs(kuznec):
             return True
 
 
-class Morphchecker():
+class Morphchecker:
     
     def __init__(self):
         self.pm2 = pymorphy2.MorphAnalyzer()
@@ -125,8 +125,7 @@ class Morphchecker():
             if init_form in tags:
                 return True
             
-    def morphcheck(self, word):
-        
+    def morphcheck(self, word):        
         word = word.replace('ё', 'е')
         morphs = morphSplitnCheck(word)
         tags = self.rb.tags_for_morph(morphs.postfix)
@@ -155,3 +154,7 @@ class Morphchecker():
 
     def text_morphcheck(self, text):
         return [(word, self.morphcheck(word)) for word in self.tokenize(text)]
+
+    def file_morphcheck(self, filename):
+        with open(filename, 'r', encoding='utf-8') as file:
+            return text_morphcheck(file.read())
