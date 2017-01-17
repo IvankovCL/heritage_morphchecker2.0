@@ -1,7 +1,7 @@
 import re
 import pymorphy2
 from collections import defaultdict, namedtuple
-from prjscript import morphSplitnCheck, kuznec
+from prjscript_dev import morphSplitnCheck, kuznec
 import sys
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word 
@@ -29,8 +29,9 @@ class Rulebook:
         for rule in rules:
             
             tag = rule[5].strip('()')
-            morph = re.sub('[//[a-zA-Z]]*', '', rule[3]) # нужно убрать символы после слэша
             
+            morph = re.sub('[//[a-zA-Z]]*', '', rule[3]) # нужно убрать символы после слэша
+
             POS = tag[:5]
             if POS in ['NOUN.', 'ADJF.', 'ADJS.']:
                 morphs_for_tag[POS + 'им.п.м.р.'].add(rule[2])
@@ -47,6 +48,7 @@ class Rulebook:
                                            )
             
         self.morphs_for_tag = self.extend(morphs_for_tag)
+        print(type(morphs_for_tag))
         self.rules_for_code = rules_for_code
 
  
@@ -96,6 +98,8 @@ class Allomorphs(kuznec):
     def is_allomorph(self, variant_root, error_root):
         regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
         if re.match(regexp, variant_root) != None:
+        # print(self.allomorphs[error_root])
+        # if variant_root in self.allomorphs[error_root]:
             return True
 
 
@@ -128,7 +132,7 @@ class Morphchecker:
     def morphcheck(self, word):        
         word = word.replace('ё', 'е')
         morphs = morphSplitnCheck(word)
-        tags = self.rb.tags_for_morph(morphs.postfix)
+        tags = self.rb.tags_for_morph(morphs.postfix[0])
         spellchecked, is_correct = self.spellcheck(word)
         
         if is_correct == True:
@@ -136,7 +140,7 @@ class Morphchecker:
         else:
             suggestions = []
             for lemma in self.lemma_merge(spellchecked):
-                if self.al.is_allomorph(morphSplitnCheck(lemma).root, morphs.root) == True:
+                if self.al.is_allomorph(morphSplitnCheck(lemma).root[0], morphs.root[0]) == True:
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
                         if corrected is not None:
@@ -157,4 +161,4 @@ class Morphchecker:
 
     def file_morphcheck(self, filename):
         with open(filename, 'r', encoding='utf-8') as file:
-            return text_morphcheck(file.read())
+            return self.text_morphcheck(file.read())
