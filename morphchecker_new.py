@@ -48,11 +48,10 @@ class Rulebook:
                                            )
             
         self.morphs_for_tag = self.extend(morphs_for_tag)
-        print(type(morphs_for_tag))
         self.rules_for_code = rules_for_code
 
  
-    def rules_for_lemma(self, lemma, grams=[]):               
+    def rules_for_lemma(self, lemma, grams=[]):
         return [rule
                 for code in self.codes_for_lemma[lemma]
                 for rule in self.rules_for_code[code]
@@ -64,7 +63,11 @@ class Rulebook:
                 if morph in self.morphs_for_tag[tag]}
 
     def pos_for_lemma(self, lemma):
-        return self.rules_for_lemma(lemma)[0].gram[:4]            
+        try: 
+            return self.rules_for_code[self.codes_for_lemma[lemma][0]][0].gram[:4]
+        except:
+            print('Лемма отстутсвует! Часть речи неизвестна!')
+            return None
 
     def apply_rule(self, rule, lemma):
         if re.search(rule.condition.replace('0', '') + '$', lemma) != None:
@@ -98,7 +101,6 @@ class Allomorphs(kuznec):
     def is_allomorph(self, variant_root, error_root):
         regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
         if re.match(regexp, variant_root) != None:
-        # print(self.allomorphs[error_root])
         # if variant_root in self.allomorphs[error_root]:
             return True
 
@@ -118,21 +120,25 @@ class Morphchecker:
         if spellchecked['correct']:
             return spellchecked['correct'], True
         else:
-            return spellchecked['mistake'], False
+            return [mistake
+                    for mistake in spellchecked['mistake']
+                    if ' ' not in mistake], False
         
     def lemma_merge(self, variants):
         return list({self.pm2.parse(re.sub('[^а-яА-Я]', ' ', variant))[0].normalized.word.replace('ё', 'е')
                     for variant in variants})
 
-    def init_forms(self, tags):
+    def find_init_form(self, tags):
         for init_form in ['NOUN.им.п.м.р.', 'ADJF.им.п.м.р.', 'ADJS.им.п.м.р.', 'VERB.инф.']:
             if init_form in tags:
-                return True
+                return init_form
             
     def morphcheck(self, word):        
         word = word.replace('ё', 'е')
         morphs = morphSplitnCheck(word)
         tags = self.rb.tags_for_morph(morphs.postfix[0])
+        print(morphs.postfix[0])
+        print(tags)
         spellchecked, is_correct = self.spellcheck(word)
         
         if is_correct == True:
@@ -140,13 +146,14 @@ class Morphchecker:
         else:
             suggestions = []
             for lemma in self.lemma_merge(spellchecked):
+                print(lemma)
                 if self.al.is_allomorph(morphSplitnCheck(lemma).root[0], morphs.root[0]) == True:
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
                         if corrected is not None:
                             suggestions.append(corrected.replace('0', ''))
-                if self.init_forms(tags):
-                    suggestions.append(lemma)                    
+                    if self.find_init_form(tags) == self.rb.pos_for_lemma(lemma):
+                        suggestions.append(lemma)                    
             
         return suggestions
    
