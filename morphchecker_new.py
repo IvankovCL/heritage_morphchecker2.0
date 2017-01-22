@@ -1,7 +1,7 @@
 import re
 import pymorphy2
 from collections import defaultdict, namedtuple
-from prjscript_dev import morphSplitnCheck, kuznec
+from prjscript import morphSplitnCheck, kuznec
 import sys
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word 
@@ -132,29 +132,36 @@ class Morphchecker:
         for init_form in ['NOUN.им.п.м.р.', 'ADJF.им.п.м.р.', 'ADJS.им.п.м.р.', 'VERB.инф.']:
             if init_form in tags:
                 return init_form
-            
+    
     def morphcheck(self, word):        
         word = word.replace('ё', 'е')
+        print('=======ПРОВЕРЯЕМ СЛОВО: %s' % word)
         morphs = morphSplitnCheck(word)
         tags = self.rb.tags_for_morph(morphs.postfix[0])
-        print(morphs.postfix[0])
-        print(tags)
+        print('ОКОНЧАНИЕ: %s' % morphs.postfix[0])
+        print('ПОКАЗАТЕЛИ ОКОНЧАНИЯ: %s' % tags)
         spellchecked, is_correct = self.spellcheck(word)
         
         if is_correct == True:
             suggestions = spellchecked
         else:
             suggestions = []
+            print('СПЕЛЛЧЕК+ЛЕММАТИЗАЦИЯ: %s' % self.lemma_merge(spellchecked)+'\n')
             for lemma in self.lemma_merge(spellchecked):
-                print(lemma)
+                print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
+                print('КОРЕНЬ СЛОВА С ОШИБКОЙ: %s' % morphSplitnCheck(lemma).root[0])
+                print('КОРЕНЬ ВАРИАНТА: %s' % morphs.root[0])                
                 if self.al.is_allomorph(morphSplitnCheck(lemma).root[0], morphs.root[0]) == True:
+                    print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
                         if corrected is not None:
                             suggestions.append(corrected.replace('0', ''))
                     if self.find_init_form(tags) == self.rb.pos_for_lemma(lemma):
-                        suggestions.append(lemma)                    
-            
+                        suggestions.append(lemma)
+                else:
+                    print('НЕ АЛЛОМОРФ!'+'\n')
+        print('ИСПРАВЛЕНИЯ: %s \n' % suggestions)
         return suggestions
    
     def tokenize(self, text):
