@@ -66,7 +66,7 @@ class Rulebook:
         try: 
             return self.rules_for_code[self.codes_for_lemma[lemma][0]][0].gram[:4]
         except:
-            print('Лемма отстутсвует! Часть речи неизвестна!')
+            print('Лемма отсутствует! Часть речи неизвестна! \n')
             return None
 
     def apply_rule(self, rule, lemma):
@@ -89,7 +89,7 @@ class Allomorphs(kuznec):
    
     def __init__(self):
         self.allomorphs = defaultdict(str,
-                                       {self.worddict[item][place]['morph']:self.worddict[item][place]['allo']
+                                       {item:self.worddict[item][place]['allo'] # self.worddict[item][place]['morph']:
                                         for item in self.worddict
                                         for place in self.worddict[item]
                                         if 'status' in self.worddict[item][place]
@@ -97,13 +97,22 @@ class Allomorphs(kuznec):
                                         and self.worddict[item][place]['allo']
                                         }
                                        )
-        
+                       
     def is_allomorph(self, variant_root, error_root):
-        regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
-        if re.match(regexp, variant_root) != None:
-        # if variant_root in self.allomorphs[error_root]:
+        """regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
+        print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
+        if regexp != '^()' and re.match(regexp, variant_root) != None:"""
+        print('СПИСОК АЛЛОМОРФОВ: %s' % self.allomorphs[error_root])
+        if variant_root in [re.sub('[0-9]', '', allomorph)
+                            for allomorph in self.allomorphs[error_root]]:
             return True
 
+    def is_allomorph2(self, lemma, error_root):
+        print('СПИСОК АЛЛОМОРФОВ ВАРИАНТА: %s' % self.allomorphs[lemma])
+        if error_root in [re.sub('[0-9]', '', allomorph)
+                            for allomorph in self.allomorphs[lemma]]:
+            return True
+        
 
 class Morphchecker:
     
@@ -138,6 +147,7 @@ class Morphchecker:
         print('=======ПРОВЕРЯЕМ СЛОВО: %s' % word)
         morphs = morphSplitnCheck(word)
         tags = self.rb.tags_for_morph(morphs.postfix[0])
+        print('КОРЕНЬ: %s' % morphs.root[0])
         print('ОКОНЧАНИЕ: %s' % morphs.postfix[0])
         print('ПОКАЗАТЕЛИ ОКОНЧАНИЯ: %s' % tags)
         spellchecked, is_correct = self.spellcheck(word)
@@ -148,16 +158,16 @@ class Morphchecker:
             suggestions = []
             print('СПЕЛЛЧЕК+ЛЕММАТИЗАЦИЯ: %s' % self.lemma_merge(spellchecked)+'\n')
             for lemma in self.lemma_merge(spellchecked):
-                print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
-                print('КОРЕНЬ СЛОВА С ОШИБКОЙ: %s' % morphSplitnCheck(lemma).root[0])
-                print('КОРЕНЬ ВАРИАНТА: %s' % morphs.root[0])                
-                if self.al.is_allomorph(morphSplitnCheck(lemma).root[0], morphs.root[0]) == True:
+                print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)                
+                # print('КОРЕНЬ ВАРИАНТА: %s'% morphSplitnCheck(lemma).root[0])                
+                if self.al.is_allomorph2(lemma, morphs.root[0]) == True: # morphSplitnCheck(lemma).root[0]
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
                         if corrected is not None:
                             suggestions.append(corrected.replace('0', ''))
                     if self.find_init_form(tags) == self.rb.pos_for_lemma(lemma):
+                        print('ЧАСТЬ РЕЧИ: %s \n' % self.rb.pos_for_lemma(lemma))
                         suggestions.append(lemma)
                 else:
                     print('НЕ АЛЛОМОРФ!'+'\n')

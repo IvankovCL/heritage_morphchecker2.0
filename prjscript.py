@@ -4,7 +4,7 @@ from nltk.stem import snowball as stem
 import time
 
 vowels = ['а', 'у', 'о', 'ы', 'и', 'э', 'я', 'ю', 'ё', 'е']
-
+"""
 mistakes = []
 text = open('mistakes.txt', 'r') 
 for line in text:
@@ -26,14 +26,14 @@ mist = open('testset.txt','r',encoding = 'utf-8')
 for line in mist:
     mistakes2.append(line.replace('\n',''))
 
-mist.close()
+mist.close()"""
 stmr = stem.RussianStemmer()
 
 # for item in mistakes:
  #   cash = []
  #   for word in item:
  #       cash.append(stmr.stem(word))
-#    print(cash)
+#    # print(cash)
 
 
 
@@ -45,15 +45,16 @@ class kuznec:
     
     cashline = []
     
-    with open('umorphodict2.csv', 'r', encoding = 'utf-8') as slovar:
+    with open('resources/morphodict.csv', 'r', encoding = 'utf-8') as slovar:
         next(slovar)
     
         for line in slovar:
-            line = line.split('\t')
+            line = line.split(';')
             if line[0] not in worddict:
-                worddict[line[0]] = {}  
-    
-            worddict[line[0]].update({line[3] : {'morph' : line[1], 'status' : line[2], 'place' : line[3], 'allo' : line[4].split('|'), 'pos' : line[5].replace('\n','')}})
+                worddict[line[0]] = {}
+
+            if line[4]:
+                worddict[line[0]].update({line[3] : {'morph' : line[1], 'status' : line[2], 'place' : line[3], 'allo' : line[4].split('|'), 'pos' : line[5].replace('\n','')}})
             if line[2] == 'корень':
                 rootdict.append(line[1])
             if line[2] == 'интерфикс':
@@ -86,23 +87,23 @@ interfixlist = list(set(kuzdra.interfixlist))
 #            if worddict[word][str(pl)]['status'] == 'суффикс':
 #                wcash.append(worddict[word][str(pl)]['morph'])
 #        except:
-#            print('boink!')
+#            # print('boink!')
 #            pass
 #    mrph = set(wcash)
 
 
 
-# print(stmr.stemmmm('изменяющимися'))
+# # print(stmr.stemmmm('изменяющимися'))
 
 
 # VSE KAKIE EST SUFFIXI NA KONCE ZAPISIVAET
 def get_sfx(text, suffix):
     sfxcash = []
     for i in suffix:
-#        print(i)
+#        # print(i)
         if text.endswith(i):
             sfxcash.append(i)
-            print('суффикс ' + i + ' !!!')
+            # print('суффикс ' + i + ' !!!')
     return(sfxcash)
 
 def strip_end(text, suffix, scheck = 0):
@@ -118,7 +119,7 @@ def strip_end(text, suffix, scheck = 0):
             
                     
         else:
-            print('VOWELCOUNT INSUFFICIENT')
+            # print('VOWELCOUNT INSUFFICIENT')
             return([text,''])   
     else:
         return(text[:len(text)-len(suffix)])
@@ -128,7 +129,7 @@ def strip_end(text, suffix, scheck = 0):
 #    prcash = []
 #    for i in prst:
 #        if text.startswith(i):
-#            print('Приставка ' + i + ' !!!')
+#            # print('Приставка ' + i + ' !!!')
 #            prcash.append(i)
             
 class prefixwork:
@@ -140,7 +141,7 @@ class prefixwork:
         
         for i in prst:
             if text.startswith(i):
-                print(' CLASSNAJA Приставка ' + i + ' !!!')
+                # print(' CLASSNAJA Приставка ' + i + ' !!!')
                 vowelcount = 0
                 for s in vowels:
                     
@@ -170,7 +171,7 @@ class postfixwork:
         
         for i in post:
             if text.endswith(i):
-                print(' CLASSNAJA okon4anie ' + i + ' !!!')
+                # print(' CLASSNAJA okon4anie ' + i + ' !!!')
                 vowelcount = 0
                 for s in vowels:
                     
@@ -209,10 +210,10 @@ def get_syll(word):
     
     
 #def recheck(word):
-#    print('RECHECK WITH PRSYLL IS BEING RUN')
-#    print(word)
+#    # print('RECHECK WITH PRSYLL IS BEING RUN')
+#    # print(word)
 #    if word in rootdict:
-#        print('STRIKE WORD')
+#        # print('STRIKE WORD')
 #        return((word,1))
 # A-ROOT STEP -----------------------------------------------------------------
 #    if word.endswith('а'):
@@ -224,12 +225,12 @@ def get_syll(word):
 #            maxARoot = (max(arootDict, key = len))
 #            prst = word[:len(word) - len(maxARoot)]
 #            if prst in stmr.gtprst(): 
-#                print('STRIKE A-ROOT')
+#                # print('STRIKE A-ROOT')
 #                return([maxARoot, prst, ''],5)
 #
 #    nopr = prefixwork(word)
 #    if nopr.ostatok in rootdict:
-#        print('STRIKE SOLO PR')
+#        # print('STRIKE SOLO PR')
 #        return([nopr.ostatok, nopr.maxprefix, ''],2)
 #    sfxrtcash = {}
 #    for i in get_sfx(word, stmr.gtsfx()):
@@ -243,7 +244,7 @@ def get_syll(word):
 #            if strip_end(nopr.ostatok, i) in rootdict:
 #                sfxrtcash.update({strip_end(nopr.ostatok, i) : i})
 #    if len(sfxrtcash) > 0:
-#        print('SUTORAIKU SFX!')    
+#        # print('SUTORAIKU SFX!')    
 #        maxkey = (max(list(sfxrtcash.keys()), key = len))
 #        return([maxkey, nopr.maxprefix, sfxrtcash[maxkey]],3)
 
@@ -256,7 +257,7 @@ class rootworks():
 # FIRST STEP ------------------------------------------------------------------    
         if word in rootdict:
 
-            print('STRIKE WORD')
+            # print('STRIKE WORD')
 
             self.root += [word]
             return
@@ -270,7 +271,7 @@ class rootworks():
                 maxARoot = (max(arootDict, key = len))
                 prst = word[:len(word) - len(maxARoot)]
                 if prst in stmr.gtprst(): 
-                    print('STRIKE A-ROOT')
+                    # print('STRIKE A-ROOT')
                     self.prefix += [prst]
                     self.root += [maxARoot]
                     return
@@ -279,7 +280,7 @@ class rootworks():
 
         self.nopr = nopr
         if nopr.ostatok in rootdict:
-            print('STRIKE SOLO PR')
+            # print('STRIKE SOLO PR')
             self.root += [nopr.ostatok]
             self.prefix += [nopr.maxprefix]
             return
@@ -300,7 +301,7 @@ class rootworks():
                 if strip_end(nopr.ostatok, i) in rootdict:
                     sfxrtcash.update({strip_end(nopr.ostatok, i) : i})
         if len(sfxrtcash) > 0:
-            print('SUTORAIKU SFX!')    
+            # print('SUTORAIKU SFX!')    
             maxkey = (max(list(sfxrtcash.keys()), key = len))
             self.root += [maxkey]
             self.prefix += [nopr.maxprefix]
@@ -338,17 +339,17 @@ class rootworks():
             self.prefix += [self.nopr.maxprefix]
             word = self.nopr.ostatok
         
-            print('MASS PREFIX STAGE')
+            # print('MASS PREFIX STAGE')
 
-            print(self.postfix)
-            print(word)
+            # print(self.postfix)
+            # print(word)
 
             self.go_get_it(word)
 
 # PLAN KAPKAN
         if not self.successCode:
             
-            print('PLAN PEREHVAT')
+            # print('PLAN PEREHVAT')
             self.flush()
             rootCash = []
             for i in rootdict:
@@ -358,13 +359,13 @@ class rootworks():
                 self.extraRoot += [max(list(rootCash), key = len)]
                 word = self.word[len(max(list(rootCash), key = len)):]
                                        
-                print(word)
+                # print(word)
               #  self.go_get_it(word)
               
 
                 self.go_get_it(word)
                 root_no_int = ''.join(self.root)
-                print('DA ETO ON'+root_no_int)
+                # print('DA ETO ON'+root_no_int)
                 
                 for i in interfixlist:
                     
@@ -374,9 +375,9 @@ class rootworks():
                         word = word[len(i):]
                         self.go_get_it(word)
                         root_int = ''.join(self.root)
-                        print('da eto on '+root_int)
+                        # print('da eto on '+root_int)
                         if len(root_int) > len(root_no_int):
-                            print('subzero wins')
+                            # print('subzero wins')
                             pass
                         else:
                             self.root = [root_no_int]
@@ -397,18 +398,18 @@ class rootworks():
                 self.suffix += [max(get_sfx(word,stmr.gtsfx()), key = len)]
             except:
                 pass
-            print(word)
+            # print(word)
             word = word[:len(word)-len(suffix)]
-            print('MAX SUFFIX STAGE')
-            print(self.suffix)
-            print(word)
+            # print('MAX SUFFIX STAGE')
+            # print(self.suffix)
+            # print(word)
             
             self.go_get_it(word)
 
 
 # IF ALL FAILS        
         if not self.successCode:
-            print('MISSION FAILED')
+            # print('MISSION FAILED')
             self.flush()
             try:
                 suffix = max(get_sfx(self.word,stmr.gtsfx()), key = len)
@@ -428,10 +429,10 @@ class rootworks():
 #    word = word.ostatok
 #    word = stmr.stemmmm(text)[1]
 #    prtr = stmr.stemmmm(text)[2][0]
-#    print(prtr)
-#    print(word)
+#    # print(prtr)
+#    # print(word)
 #    nopr = None
-#    print(word)
+#    # print(word)
 #    fst = 
 #    ffst = strip_end(word, stmr.gtsfx())
 #    fnl = strip_start(strip_end(word,stmr.gtsfx())[0],stmr.gtprst())
@@ -439,27 +440,27 @@ class rootworks():
     
 # FIRST STEP ------------------------------------------------------------------    
 #    if word in rootdict:
-#        print('STRIKE WORD')
+#        # print('STRIKE WORD')
 #        return((word,1))
 # FIRST STEP END --------------------------------------------------------------
 # A-ROOT STEP -----------------------------------------------------------------
 #    if word.endswith('а'):
 #        arootDict = []
 #        for i in stmr.gtart():
-#            print(i)
+#            # print(i)
 #            if word.endswith(i):
 #                arootDict.append(i)
 #        if len(arootDict) > 0:
 #            maxARoot = (max(arootDict, key = len))
 #            prst = word[:len(word) - len(maxARoot)]
 #            if prst in stmr.gtprst(): 
-#                print('STRIKE A-ROOT')
+#                # print('STRIKE A-ROOT')
 #                return([maxARoot, prst, ''],5)
 
 # SECOND STEP -----------------------------------------------------------------
  #   nopr = prefixwork(word)
  #   if nopr.ostatok in rootdict:
- #       print('STRIKE SOLO PR')
+ #       # print('STRIKE SOLO PR')
  #       return([nopr.ostatok, nopr.maxprefix, ''],2)
 # SECOND STEP END -------------------------------------------------------------
 # THIRD STEP ------------------------------------------------------------------
@@ -475,11 +476,11 @@ class rootworks():
 #            if strip_end(nopr.ostatok, i) in rootdict:
 #                sfxrtcash.update({strip_end(nopr.ostatok, i) : i})
 #    if len(sfxrtcash) > 0:
-#        print('SUTORAIKU SFX!')    
+#        # print('SUTORAIKU SFX!')    
 #        maxkey = (max(list(sfxrtcash.keys()), key = len))
 #        return([maxkey, nopr.maxprefix, sfxrtcash[maxkey]],3)
 #   tweakword = word + get_syll(prtr)
-#    print('ITO TWEAKWORD - ' + tweakword)
+#    # print('ITO TWEAKWORD - ' + tweakword)
 #    twres = recheck(tweakword)
 #    if twres != None:
 #        return twres
@@ -490,8 +491,8 @@ class rootworks():
 #    rezanoe = prefixwork(strip_end(word,mxsfx))
     
 #    fnl = [rezanoe.ostatok, rezanoe.maxprefix, mxsfx]
-#    print(fnl)
-#    print('asdasdsd')
+#    # print(fnl)
+#    # print('asdasdsd')
     
 #    return(fnl,4)
     
@@ -538,10 +539,10 @@ class kuznecFinder(kuznec, separator):
             rootFound = False
             for pos in self.worddict[word]:
                 pos = self.worddict[word][pos]
-               # print(pos)
+               # # print(pos)
                 if (pos['status'] == 'корень' and pos['morph'] == root):
                     rootFound = True
-                    print('NAWEL! ' + word)
+                    # print('NAWEL! ' + word)
                     break
             if rootFound:
                 self.wordlist.append(word)
@@ -581,10 +582,10 @@ class kuznecFinder(kuznec, separator):
             if (mPos != None and rPos != None):
                 empDelta = int(rPos) - int(mPos)
                 if empDelta == bundle[0]:
-                    print('Yeach that is the word - ' + word)
+                    # print('Yeach that is the word - ' + word)
                     return(True)
                     break
-        print('MORPHEME SHALL NOT PASS!')
+        # print('MORPHEME SHALL NOT PASS!')
         return(False)
 
 
@@ -618,7 +619,7 @@ def goThroughCorpus(inp, outputPath):
 #    if i.endswith('а'):
 #        adict.append(i)
         
-#print(set(adict))
+## print(set(adict))
 
 
 
@@ -645,9 +646,9 @@ def goThroughCorpus(inp, outputPath):
 #                wrd = raspil(w)
 #                wcash = wcash + 'Original : ' + w + '\n' + 'Separated: ' + wrd[2] + '\nSep. full: ' + wrd[2]+':'+':'.join(wrd[1][2]) + '\n\n\n'
 #            except:
-#                print('4eto powlo ne tak')
+#                # print('4eto powlo ne tak')
 #            
-#    print(wcash)
+#    # print(wcash)
  #   dump.write(wcash)
  #   dump.close()
     
@@ -655,4 +656,4 @@ def goThroughCorpus(inp, outputPath):
 
 #for i in tuple(set(morphdict)):
 #    if word.endswith(i):
-#        print(strip_end(word,i))
+#        # print(strip_end(word,i))
