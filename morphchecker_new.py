@@ -89,14 +89,16 @@ class Allomorphs(kuznec):
    
     def __init__(self):
         self.allomorphs = defaultdict(str,
-                                       {item:self.worddict[item][place]['allo'] # self.worddict[item][place]['morph']:
+                                       {item:(self.worddict[item][place]['allo']
+                                              if self.worddict[item][place]['allo'] != ['']
+                                              else [self.worddict[item][place]['morph']]
+                                              )                             
                                         for item in self.worddict
                                         for place in self.worddict[item]
                                         if 'status' in self.worddict[item][place]
                                         and self.worddict[item][place]['status'] == 'корень'
-                                        and self.worddict[item][place]['allo']
                                         }
-                                       )
+                                      ) 
                        
     def is_allomorph(self, variant_root, error_root):
         """regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
@@ -158,9 +160,11 @@ class Morphchecker:
             suggestions = []
             print('СПЕЛЛЧЕК+ЛЕММАТИЗАЦИЯ: %s' % self.lemma_merge(spellchecked)+'\n')
             for lemma in self.lemma_merge(spellchecked):
-                print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)                
-                # print('КОРЕНЬ ВАРИАНТА: %s'% morphSplitnCheck(lemma).root[0])                
-                if self.al.is_allomorph2(lemma, morphs.root[0]) == True: # morphSplitnCheck(lemma).root[0]
+                print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
+                variant_root = morphSplitnCheck(lemma).root[0]
+                print('КОРЕНЬ ВАРИАНТА: %s'% variant_root)                
+                # if self.al.is_allomorph2(lemma, morphs.root[0]): 
+                if self.al.is_allomorph(variant_root, morphs.root[0]):
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
