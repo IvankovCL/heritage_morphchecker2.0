@@ -40,10 +40,10 @@ class Rulebook:
             
             morphs_for_tag[tag].add(morph)
                         
-            rules_for_code[rule[1]].append(Rule(old=rule[2],
-                                                new=morph,
-                                                condition=rule[4], 
-                                                gram=tag
+            rules_for_code[rule[1]].append(Rule(old = rule[2].replace('0', ''),
+                                                new = morph.replace('0', ''),
+                                                condition = rule[4].replace('0', ''), 
+                                                gram = tag
                                                 )
                                            )
             
@@ -51,16 +51,27 @@ class Rulebook:
         self.rules_for_code = rules_for_code
 
  
-    def rules_for_lemma(self, lemma, grams=[]):
-        return [rule
-                for code in self.codes_for_lemma[lemma]
-                for rule in self.rules_for_code[code]
-                if rule.gram in grams]
-    
     def tags_for_morph(self, morph):
         return {tag
                 for tag in self.morphs_for_tag
                 if morph in self.morphs_for_tag[tag]}
+
+    def rules_for_lemma(self, lemma, grams=[]):
+        if grams == 'all':
+            return [rule
+                    for code in self.codes_for_lemma[lemma]
+                    for rule in self.rules_for_code[code]
+                    if re.search(rule.condition + '$', lemma) != None]
+        else:
+            return [rule
+                    for code in self.codes_for_lemma[lemma]
+                    for rule in self.rules_for_code[code]
+                    if re.search(rule.condition + '$', lemma) != None
+                    and rule.gram in grams]
+
+    def morphs_for_lemma(self, lemma):
+        return {rule.new
+                for rule in self.rules_for_lemma(lemma, grams='all')}
 
     def pos_for_lemma(self, lemma):
         try: 
@@ -70,8 +81,7 @@ class Rulebook:
             return None
 
     def apply_rule(self, rule, lemma):
-        if re.search(rule.condition.replace('0', '') + '$', lemma) != None:
-            return re.sub(rule.old.replace('0', '') + '$', rule.new, lemma)
+        return re.sub(rule.old + '$', rule.new, lemma)
 
     def extend(self, grammar):
         no_adj_noun = {'ая', 'яя', 'ее', 'ое', 'и', 'ы', 'ев', 'ей', 'ем', 'ом', 'ов', 'ет'}
@@ -163,8 +173,8 @@ class Morphchecker:
                 print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
                 variant_root = morphSplitnCheck(lemma).root[0]
                 print('КОРЕНЬ ВАРИАНТА: %s'% variant_root)                
-                # if self.al.is_allomorph2(lemma, morphs.root[0]): 
-                if self.al.is_allomorph(variant_root, morphs.root[0]):
+                if self.al.is_allomorph2(lemma, morphs.root[0]): 
+                # if self.al.is_allomorph(variant_root, morphs.root[0]):
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
