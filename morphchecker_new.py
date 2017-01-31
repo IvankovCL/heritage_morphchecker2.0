@@ -121,8 +121,8 @@ class Allomorphs(kuznec):
                             for allomorph in self.allomorphs[lemma]]:
             return True
         
-    def is_allomorph_re(self, variant_root, error_root):
-        regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
+    def is_allomorph_re(self, variant_root, error_root, lemma):
+        regexp = '^(' + re.sub('[0-9]', '', '|'.join(self.allomorphs[lemma])) + ')'
         print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
         if regexp != '^()' and re.match(regexp, variant_root) != None:
             return True
@@ -175,8 +175,9 @@ class Morphchecker:
                 print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
                 variant_root = morphSplitnCheck(lemma).root[0]
                 print('КОРЕНЬ ВАРИАНТА: %s'% variant_root)                
-                # if self.al.is_allomorph2(lemma, morphs.root[0]): 
-                if self.al.is_allomorph(variant_root, morphs.root[0]):
+                # if self.al.is_allomorph2(lemma, morphs.root[0]):
+                # if self.al.is_allomorph(variant_root, morphs.root[0]):
+                if self.al.is_allomorph_re(variant_root, morphs.root[0], lemma):
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
