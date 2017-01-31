@@ -27,10 +27,9 @@ class Rulebook:
         Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
         
         for rule in rules:
-            
-            tag = rule[5].strip('()')
-            
+                       
             morph = re.sub('[//[a-zA-Z]]*', '', rule[3]) # нужно убрать символы после слэша
+            tag = rule[5].strip('()') 
 
             POS = tag[:5]
             if POS in ['NOUN.', 'ADJF.', 'ADJS.']:
@@ -111,9 +110,6 @@ class Allomorphs(kuznec):
                                       ) 
                        
     def is_allomorph(self, variant_root, error_root):
-        """regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
-        print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
-        if regexp != '^()' and re.match(regexp, variant_root) != None:"""
         print('СПИСОК АЛЛОМОРФОВ: %s' % self.allomorphs[error_root])
         if variant_root in [re.sub('[0-9]', '', allomorph)
                             for allomorph in self.allomorphs[error_root]]:
@@ -123,6 +119,12 @@ class Allomorphs(kuznec):
         print('СПИСОК АЛЛОМОРФОВ ВАРИАНТА: %s' % self.allomorphs[lemma])
         if error_root in [re.sub('[0-9]', '', allomorph)
                             for allomorph in self.allomorphs[lemma]]:
+            return True
+        
+    def is_allomorph_re(self, variant_root, error_root):
+        regexp = '^(' + re.sub('[0-9]', '', self.allomorphs[error_root]) + ')'
+        print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
+        if regexp != '^()' and re.match(regexp, variant_root) != None:
             return True
         
 
@@ -173,8 +175,8 @@ class Morphchecker:
                 print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
                 variant_root = morphSplitnCheck(lemma).root[0]
                 print('КОРЕНЬ ВАРИАНТА: %s'% variant_root)                
-                if self.al.is_allomorph2(lemma, morphs.root[0]): 
-                # if self.al.is_allomorph(variant_root, morphs.root[0]):
+                # if self.al.is_allomorph2(lemma, morphs.root[0]): 
+                if self.al.is_allomorph(variant_root, morphs.root[0]):
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
