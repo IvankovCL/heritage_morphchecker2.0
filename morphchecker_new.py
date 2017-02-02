@@ -31,11 +31,11 @@ class Rulebook:
             morph = re.sub('[//[a-zA-Z]]*', '', rule[3]) # нужно убрать символы после слэша
             tag = rule[5].strip('()') 
 
-            POS = tag[:5]
-            if POS in ['NOUN.', 'ADJF.', 'ADJS.']:
-                morphs_for_tag[POS + 'им.п.м.р.'].add(rule[2])
-            elif POS == 'VERB.':
-                morphs_for_tag[POS + 'инф.'].add(rule[2])
+            POS = tag[0]
+            if POS in ['N', 'A']:
+                morphs_for_tag[POS + '.им.п.м.р.'].add(rule[2])
+            elif POS == 'V':
+                morphs_for_tag[POS + '.инф.'].add(rule[2])
             
             morphs_for_tag[tag].add(morph)
                         
@@ -74,23 +74,25 @@ class Rulebook:
 
     def pos_for_lemma(self, lemma):
         try: 
-            return self.rules_for_code[self.codes_for_lemma[lemma][0]][0].gram[:4]
+            return self.rules_for_code[self.codes_for_lemma[lemma][0]][0].gram[0]
         except:
             print('Лемма отсутствует! Часть речи неизвестна! \n')
             return None
 
     def apply_rule(self, rule, lemma):
-        return re.sub(rule.old + '$', rule.new, lemma)
+        replaced = re.subn(rule.old + '$', rule.new, lemma)
+        if replaced[1]:
+            return replaced[0]
 
     def extend(self, grammar):
         no_adj_noun = {'ая', 'яя', 'ее', 'ое', 'и', 'ы', 'ев', 'ей', 'ем', 'ом', 'ов', 'ет'}
         no_verb = {'и'}
-        grammar['ADJF.им.п.м.р.'] = grammar['ADJF.им.п.м.р.'].difference(no_adj_noun)
-        grammar['NOUN.им.п.м.р.'] = grammar['NOUN.им.п.м.р.'].difference(no_adj_noun) 
-        grammar['VERB.инф.'] = grammar['VERB.инф.'].difference(no_verb)
-        grammar['NOUN.ед.ч.т.п.'].update(['ией', 'ием'])        # МОЖЕТ И НЕ ПРИГОДИТЬСЯ
-        grammar['NOUN.мн.ч.р.п.'].update(['иев'])               # для случаев типа "загрязненией", "фантазием"
-        grammar['ADJF.мн.ч.т.п.'].update(['ами', 'имы'])        # для случаев типа "руссками"
+        grammar['A.им.п.м.р.'] = grammar['A.им.п.м.р.'].difference(no_adj_noun)
+        grammar['N.им.п.м.р.'] = grammar['N.им.п.м.р.'].difference(no_adj_noun) 
+        grammar['V.инф.'] = grammar['V.инф.'].difference(no_verb)
+        grammar['N.ед.ч.т.п.'].update(['ией', 'ием'])        # МОЖЕТ И НЕ ПРИГОДИТЬСЯ
+        grammar['N.мн.ч.р.п.'].update(['иев'])               # для случаев типа "загрязненией", "фантазием"
+        grammar['A.мн.ч.т.п.'].update(['ами', 'имы'])        # для случаев типа "руссками"
         return grammar
 
     
@@ -152,9 +154,9 @@ class Morphchecker:
                     for variant in variants})
 
     def find_init_form(self, tags):
-        for init_form in ['NOUN.им.п.м.р.', 'ADJF.им.п.м.р.', 'ADJS.им.п.м.р.', 'VERB.инф.']:
+        for init_form in ['N.им.п.м.р.', 'A.им.п.м.р.', 'V.инф.']:
             if init_form in tags:
-                return init_form
+                return init_form[0]
     
     def morphcheck(self, word):        
         word = word.replace('ё', 'е')
@@ -175,9 +177,9 @@ class Morphchecker:
                 print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
                 variant_root = morphSplitnCheck(lemma).root[0]
                 print('КОРЕНЬ ВАРИАНТА: %s'% variant_root)                
-                # if self.al.is_allomorph2(lemma, morphs.root[0]):
+                if self.al.is_allomorph2(lemma, morphs.root[0]):
                 # if self.al.is_allomorph(variant_root, morphs.root[0]):
-                if self.al.is_allomorph_re(variant_root, morphs.root[0], lemma):
+                # if self.al.is_allomorph_re(variant_root, morphs.root[0], lemma):
                     print('АЛЛОМОРФ!'+'\n')
                     for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                         corrected = self.rb.apply_rule(rule, lemma)
