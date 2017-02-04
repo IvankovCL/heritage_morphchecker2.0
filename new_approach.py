@@ -96,11 +96,11 @@ class Rulebook:
         try: 
             return self.rules_for_code[self.codes_for_lemma[lemma][0]][0].gram[0]
         except:
-            al = Allomorphs()
-            if al.worddict[lemma]:
-                print(al.worddict[lemma]['1']['pos'])
-                return al.worddict[lemma]['1']['pos']
-            else:
+            try:
+                al = Allomorphs()
+                if al.worddict[lemma]:
+                    return al.worddict[lemma]['1']['pos']
+            except:
                 print('Лемма отсутствует! Часть речи неизвестна! \n')
                 return None
 
