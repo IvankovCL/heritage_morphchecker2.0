@@ -61,7 +61,6 @@ class Rulebook:
             prefixes[pfx_rule[1]].add(pfx_rule[3])
             
         self.prefixes = prefixes
-
  
     def tags_for_morph(self, morph):
         return {tag
@@ -138,13 +137,15 @@ class Rulebook:
         grammar['N.ед.ч.т.п.'].update(['ией', 'ием'])        # МОЖЕТ И НЕ ПРИГОДИТЬСЯ
         grammar['N.мн.ч.р.п.'].update(['иев'])               # для случаев типа "загрязненией", "фантазием"
         grammar['A.мн.ч.т.п.'].update(['ами', 'имы'])        # для случаев типа "руссками"
-        grammar['V.п.н.ед.ч.'] = grammar['V.п.н.ед.ч.'].difference({'ли'})  # императив "дремли" путается с прош.временем
+        grammar['V.п.н.ед.ч.'] = grammar['V.п.н.ед.ч.'].difference({'ли'},{'ки'},{'ыми'})  # императив "дремли" путается с прош.временем
+        grammar['N.мн.ч.и.п.'] = grammar['N.мн.ч.и.п.'].difference({'ли'})
         return grammar
 
     
 class Allomorphs(kuznec):
    
     def __init__(self):
+        
         self.allomorphs = defaultdict(str,
                                        {item:(self.worddict[item][place]['allo']
                                               if self.worddict[item][place]['allo'] != ['']
@@ -157,29 +158,43 @@ class Allomorphs(kuznec):
                                         }
                                       )
 
-        self.prefixes = defaultdict(str)
+        prefixes = defaultdict(list)
         
         for item in self.worddict:
             for place in self.worddict[item]:
                 if 'status' in self.worddict[item][place] \
-                and self.worddict[item][place]['status'] == 'префикс' \
-                and not self.prefixes[item]:
-                    self.prefixes[item] = self.worddict[item][place]['morph']
-      
+                and self.worddict[item][place]['status'] == 'префикс':
+                    prefixes[item].append((self.worddict[item][place]['morph'], place))
+
+        prefixes = defaultdict(list,
+                                {word:sorted(prefixes[word], key=lambda x:x[1])
+                                for word in prefixes})
+                                
+        self.prefixes = defaultdict(str,
+                                    {word:''.join([pfx[0]
+                                                   for pfx in prefixes[word]
+                                                   if len(prefixes[word]) > 0])
+                                     for word in prefixes})      
                               
-    def is_allomorph_re(self, word, lemma):
-        regexp = '^(' + re.sub('[0-9]', '', '|'.join(self.allomorphs[lemma])) + ')'
+    def is_allomorph(self, word, lemma):
+        choice = '|'.join(self.allomorphs[lemma])
+                          
+        vowel_pairs = {'о':'[ао]',
+                       'и':'[ыи]',
+                       'е':'[еи]',
+                       'я':'[еяи]'}
+                          
+        for vowel in vowel_pairs:
+            if vowel in choice:
+                choice = re.sub('([^\[])'+vowel+'([^\]])', '\g<1>'+vowel_pairs[vowel]+'\g<2>', choice)
+
+        regexp = '^(' + re.sub('[0-9]', '', choice) + ')'        
+        
         print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
         if regexp != '^()' and re.search(regexp, word) is not None:
             return True
         if regexp == '^()':
             return 'Пусто!'
-
-    def is_allomorph_re2(self, word, lemma):
-        regexp = re.sub('[аоуыэяёиюэ]', '[аоуыэяёиюэ]', word[:int(len(word)/2)-1])
-        print('БЕЗ ГЛАСНЫХ: %s' % regexp)
-        if re.search(regexp, lemma) is not None:
-            return True
         
 
 class M:
@@ -205,7 +220,7 @@ class M:
         return list({self.pm2.parse(re.sub('[^а-яА-Я]', ' ', variant))[0].normalized.word.replace('ё', 'е')
                     for variant in variants})
 
-    def bare_approach(self, word):
+    def bare_mcheck(self, word):
         word = word.lower().replace('ё', 'е')
         spellchecked, is_correct = self.spellcheck(word)
         
@@ -221,9 +236,33 @@ class M:
 
         return sorted(suggestions, key=lambda x:x[1], reverse=True)
 
-    def approach(self, word):
+    def prefix_match(self, prefix, word):
+        for pfx_code in self.rb.prefixes:
+            pfx_to_match = self.rb.prefixes[pfx_code]
+            if prefix in pfx_to_match:
+                print('ПРЕФИКСЫ: %s' % pfx_to_match)
+                pfx_match = re.search('^('+'|'.join(pfx_to_match)+')', word)
+                if pfx_match is not None:
+                    print('ПРЕФИКС СОВПАЛ')
+                    return pfx_match
+
+    def actual_event(self, part, lemma, suggestions):
+        suffix = self.rb.find_sfx(part)
+        if self.al.is_allomorph(part, lemma) == True:
+            print('КОРЕНЬ СОВПАЛ')
+            suggestions += self.rb.try_all(suffix, lemma)
+            print('ВОТ ЧТО ПОЛУЧИЛОСЬ:' + str(self.rb.try_all(suffix, lemma)))
+        elif self.al.is_allomorph(part, lemma) == 'Пусто!':
+            print('НЕТ В КУЗНЕЦОВОЙ')
+            suggestions += self.rb.try_all(suffix, lemma)
+        else:
+            print('НИГДЕ НЕТ')
+            suggestions.append((lemma, 0))
+        return suggestions        
+
+    def mcheck(self, word):
         word = word.lower().replace('ё', 'е')
-        suffix = self.rb.find_sfx(word)
+        # suffix = self.rb.find_sfx(word)
         spellchecked, is_correct = self.spellcheck(word)
         
         if is_correct == True:
@@ -234,55 +273,29 @@ class M:
             for lemma in self.lemma_merge(list(set(spellchecked).union(context_rules(word)))):
                 print(lemma)
                 prefix = self.al.prefixes[lemma]
+                
                 if prefix:
-                    for pfx_code in self.rb.prefixes:
-                        pfx_to_match = self.rb.prefixes[pfx_code]
-                        if prefix in pfx_to_match:
-                            print('ПРЕФИКСЫ: %s' % pfx_to_match)
-                            pfx_match = re.search('^('+'|'.join(pfx_to_match)+')', word)
-                            if pfx_match is not None:
-                                print('ПРЕФИКС СОВПАЛ')
-                                if self.al.is_allomorph_re2(word.replace(pfx_match.group(0), '', 1), lemma) == True:
-                                    print('БЕЗ ГЛАСНЫХ СОВПАЛО')
-                                    if self.al.is_allomorph_re(word.replace(pfx_match.group(0),'', 1), lemma) == True:
-                                        print('КОРЕНЬ СОВПАЛ')
-                                        suggestions += self.rb.try_all(suffix, lemma)
-                                        print('ВОТ ЧТО ПОЛУЧИЛОСЬ:' + str(self.rb.try_all(suffix, lemma)))
-                                    elif self.al.is_allomorph_re(word.replace(pfx_match.group(0),'', 1), lemma) == 'Пусто!':
-                                        print('НЕТ В КУЗНЕЦОВОЙ')
-                                        suggestions += self.rb.try_all(suffix, lemma)
-                                else:
-                                    print('НИГДЕ НЕТ')
-                                    suggestions.append((lemma, 0))
+                    pfx_match = self.prefix_match(prefix, word)
+                    
+                    if pfx_match:
+                        without_prefix = word.replace(pfx_match.group(0), '', 1)
+                        suggestions = self.actual_event(without_prefix, lemma, suggestions)
+                        
                 else:
-                    if self.al.is_allomorph_re2(word, lemma) == True:
-                        print('БЕЗ ГЛАСНЫХ СОВПАЛО')
-                        if self.al.is_allomorph_re(word, lemma) == True:
-                            print('КОРЕНЬ СОВПАЛ')
-                            suggestions += self.rb.try_all(suffix, lemma)
-                        elif self.al.is_allomorph_re(word, lemma) == 'Пусто!':
-                            print('НЕТ В КУЗНЕЦОВОЙ')
-                            suggestions += self.rb.try_all(suffix, lemma)                         
-                    else:
-                        print('НИГДЕ НЕТ')
-                        suggestions.append((lemma, 0))
-
-        print(sorted(suggestions, key=lambda x:x[1], reverse=True))
+                    suggestions = self.actual_event(word, lemma, suggestions)
 
         return sorted((list(set(suggestions))), key=lambda x:x[1], reverse=True)
 
     def test(self):
-        b,c = [],{}
+        
         with open('for tests.txt', 'r', encoding='utf-8') as test:
-            for word in test:
-                b.append(word.strip('\n'))
-        for w in b:
-            print(w)
-            c[w] = self.approach(w)
+            all_words = [entry.strip('\n') for entry in test]
+            results = {word:self.mcheck(word) for word in all_words}
 
-        with open('good_res.txt', 'w', encoding='utf-8') as rrr:
-            for wd in c:
-                rrr.write(wd+' '+str(c[wd])+'\n')
+        with open('test_res.txt', 'w', encoding='utf-8') as output:
+            for result in results:
+                output.write(result+' '+str(results[result])+'\n')
+                
         print('DONE')
   
     def tokenize(self, text):
