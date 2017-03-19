@@ -5,7 +5,7 @@ import sys
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word
 from rules import context_rules
-from prjscript import morphSplitnCheck, kuznec
+from prjscript28 import morphSplitnCheck, kuznec
 from collections import defaultdict, namedtuple
 
 Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
@@ -140,19 +140,16 @@ class Allomorphs(kuznec):
 
     def vowel_change(self, string):
 
-        vowel_pairs = {'о': '[ао]',
-                       'а': '[ао]',
-                       'и': '[ие]',
-                       'ы': '[ыи]',
-                       'е': '[ие]',
-                       'я': '[еяи]'}
+        vowel_pairs = {'о': '[ао]', 'а': '[ао]',
+                       'и': '[ие]', 'ы': '[ыи]',
+                       'е': '[ие]', 'я': '[еяи]'}
 
         return ''.join([letter
                         if letter not in vowel_pairs
                         else vowel_pairs[letter]
                         for letter in string])
 
-    def is_allomorph(self, error_root, lemma):
+    def is_allomorph(self, error_roots, lemma):
 
         choice = '|'.join(self.allomorphs[lemma])
 
@@ -175,11 +172,9 @@ class Allomorphs(kuznec):
             regexp = '^(' + re.sub('([0-9]|\(j\))', '', self.vowel_change(variant_root)) + ')'  # во(j) - в корнях слов военный, воин
             print('СПИСОК АЛЛОМОРФОВ: %s' % regexp)
 
-        if re.search(regexp, error_root) is not None:
-            return True
-        else:
-            return False
-        
+        return any([re.search(regexp, error_root)
+                   for error_root in error_roots])
+
         
 
 class Morphchecker:
@@ -204,15 +199,18 @@ class Morphchecker:
 
         morphs = morphSplitnCheck(word)
 
+        roots = []
         if hasattr(morphs, 'extraRoot') and morphs.extraRoot:
-            root = morphs.extraRoot[0]
-        elif morphs.root:
-            root = morphs.root[0]
+            roots.append(morphs.extraRoot[0])
+        if morphs.root:
+            roots.append(morphs.root[0])
 
-        if morphs.postfix:
+        if morphs.postfix and morphs.postfix[0]:
+            print('ПОСТФИКС: '+morphs.postfix[0])
             flexion = morphs.postfix[0]
         else:
             if morphs.suffix:
+                print('СУФФИКС: ' + morphs.suffix[0])
                 flexion = morphs.suffix[0]
 
         if not flexion:
@@ -222,11 +220,11 @@ class Morphchecker:
         if hasattr(morphs, 'reflexive'):
             tags = {tag for tag in tags if 'V' in tag}
 
-        print('КОРЕНЬ: %s' % root)
+        print('КОРЕНЬ: %s' % str(roots))
         print('ОКОНЧАНИЕ: %s' % flexion)
         print('ПОКАЗАТЕЛИ ОКОНЧАНИЯ: %s' % tags)
 
-        return root, tags
+        return roots, tags, flexion
 
     def pos_check(self, lemma, tags):
         if self.rb.pos_for_lemma(lemma) in {tag[0] for tag in tags}:
@@ -255,9 +253,8 @@ class Morphchecker:
         return list(lemmas)
 
     def edit_distance(self, word, suggestions):
-        scores = [(pylev.levenshtein(word, suggestion), suggestion)
-                  for suggestion in suggestions]
-        return sorted(scores)
+        return sorted([(pylev.levenshtein(word, suggestion), suggestion)
+                       for suggestion in suggestions])
 
     def locate(self, error, suggestion):
         error_morphs = error.morphList
@@ -283,12 +280,12 @@ class Morphchecker:
             spellchecked = list(set(spellchecked).union(context_rules(word)))
             print('СПЕЛЛЧЕК: %s' % spellchecked + '\n')
 
-            root, tags = self.get_root_and_tags(word)
+            roots, tags, flexion = self.get_root_and_tags(word)
 
             for lemma in self.lemma_merge(spellchecked):
                 if self.pos_check(lemma, tags):
                     print('АНАЛИЗИРУЕМ ВАРИАНТ: %s' % lemma)
-                    if self.al.is_allomorph(root, lemma):
+                    if self.al.is_allomorph(roots, lemma):
                         print('АЛЛОМОРФ!' + '\n')
                         for rule in self.rb.rules_for_lemma(lemma, grams=tags):
                             corrected = self.rb.apply_rule(rule, lemma)
