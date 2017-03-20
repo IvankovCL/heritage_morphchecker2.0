@@ -2,6 +2,7 @@ import re
 import pymorphy2
 import pylev
 import sys
+import difflib
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word
 from rules import context_rules
@@ -206,11 +207,9 @@ class Morphchecker:
             roots.append(morphs.root[0])
 
         if morphs.postfix and morphs.postfix[0]:
-            print('ПОСТФИКС: '+morphs.postfix[0])
             flexion = morphs.postfix[0]
         else:
             if morphs.suffix:
-                print('СУФФИКС: ' + morphs.suffix[0])
                 flexion = morphs.suffix[0]
 
         if not flexion:
@@ -220,7 +219,7 @@ class Morphchecker:
         if hasattr(morphs, 'reflexive'):
             tags = {tag for tag in tags if 'V' in tag}
 
-        print('КОРЕНЬ: %s' % str(roots))
+        print('ВОЗМОЖНЫЕ КОРНИ: %s' % str(roots))
         print('ОКОНЧАНИЕ: %s' % flexion)
         print('ПОКАЗАТЕЛИ ОКОНЧАНИЯ: %s' % tags)
 
@@ -256,15 +255,20 @@ class Morphchecker:
         return sorted([(pylev.levenshtein(word, suggestion), suggestion)
                        for suggestion in suggestions])
 
-    def locate(self, error, suggestion):
-        error_morphs = error.morphList
-        suggest_morphs = morphSplitnCheck(suggestion).morphList
-        print(error_morphs)
+    def locate(self, suggest, error):
+        suggest_morphs = morphSplitnCheck(suggest).morphList
+        error_morphs = morphSplitnCheck(error).morphList
         print(suggest_morphs)
-        """
-        suggestions = [self.locate(morphs, suggestion[1])
-                       for suggestion in suggestions
-                       if suggestion[0] == 1]"""
+        print(error_morphs)
+
+        difference = ''.join(difflib.ndiff(suggest_morphs, error_morphs))
+        print(difference)
+        altered = re.findall("[+-] ([^+-]*)\?", difference)
+        removed = re.findall("[\-] ([^?+\- ]*)", difference)
+        added = re.findall("[+] ([^?+\- ]*)", difference)
+
+        Location = namedtuple('Location', ['suggest', 'altered', 'added', 'removed'])
+        return Location(suggest=suggest, altered=altered, added=added, removed=removed)
 
     def mcheck(self, word):
         word = word.replace('ё', 'е')
@@ -307,7 +311,7 @@ class Morphchecker:
                                for suggestion in suggestions
                                if suggestion[0] == min_ed[0]]
 
-        return suggestions
+        return [self.locate(suggestion[1]) for suggestion in suggestions]
 
     def tokenize(self, text):
         import string
