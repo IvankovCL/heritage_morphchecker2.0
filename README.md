@@ -1,6 +1,8 @@
 # Morphchecker     
-Система обнаружения и коррекции морфологических ошибок 
-для корпуса эритажного русского языка Russian Learner Corpora
+Система обнаружения и коррекции морфологических ошибок для корпуса эритажного русского языка Russian Learner Corpus http://web-corpora.net/RLC
+
+### Статья
+Morphchecker for non-standard data: a tool for morphological error correction in learner corpora https://docs.google.com/document/d/1_QR2Us4znALsUEjiOh2pw3m8Y0PD-Fb0KKO8EAoXPGc/edit?usp=sharing
 
 ### Инструкция
 Собственно коррекция морфологических ошибок:
