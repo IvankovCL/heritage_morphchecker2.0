@@ -12,9 +12,21 @@ from collections import defaultdict, namedtuple
 Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
 
 class Rulebook:
+    """Модуль для работы со словарями Hunspell
+
+    Файл ru_RU.dic содержит список лемм, каждой из которых приписано множество двухбуквенных кодов,
+    каждый код указывает на множество правил постановки леммы во все возможные морфологические формы.
+
+    Формат правила: СУФФИКС/ПРЕФИКС код заменяемая_часть_леммы окончание_нужной_формы условие граммема_окончания.
+
+    Например:
+    бороться/BBLLNN                             = на правила для спряжения глагола "бороться" указывают коды BB, LL, NN
+    SFX NN оться ются оться (V.н.в.мн.ч.т.л.)   = форма V.н.в.мн.ч.т.л. образуется заменой окончания "оться" на "ются"
+                                                  при условии, что глагол заканчивается на "оться"
+    """
 
     def __init__(self):
-
+        """Чтение файлов"""
         with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.dic', 'r',
                   encoding='UTF-8') as lines:
             wordlist = [line.split('/') for line in lines if '/' in line]
@@ -55,15 +67,17 @@ class Rulebook:
                                                 )
                                            )
 
-        self.morphs_for_tag = self.heuristics(morphs_for_tag)
-        self.rules_for_code = rules_for_code
+        self.morphs_for_tag = self.heuristics(morphs_for_tag) # словарь {граммема:[морфемы]}
+        self.rules_for_code = rules_for_code  # словарь {код: [правила]}
 
     def tags_for_morph(self, morph):
+        """Определение множества граммем для морфемы"""
         return {tag
                 for tag in self.morphs_for_tag
                 if morph in self.morphs_for_tag[tag]}
 
     def rules_for_lemma(self, lemma, grams=[]):
+        """Определение для леммы правил изменения с учётом граммем"""
         if grams == 'all':
             rules = [rule
                     for code in self.codes_for_lemma[lemma]
@@ -83,10 +97,12 @@ class Rulebook:
         return rules
 
     def morphs_for_lemma(self, lemma):
+        """Определение множества морфем, доступных для леммы"""
         return {rule.new
                 for rule in self.rules_for_lemma(lemma, grams='all')}
 
     def pos_for_lemma(self, lemma):
+        """Определение части речи леммы по словарю"""
         try:
             return self.rules_for_lemma(lemma, grams='all')[0].gram[0]
         except (IndexError, KeyError):
@@ -99,11 +115,13 @@ class Rulebook:
                 return None
 
     def apply_rule(self, rule, lemma):
+        """Постановка леммы в некоторую форму согласно правилу"""
         replaced = re.subn(rule.old + '$', rule.new, lemma)
         if replaced[1]:
             return replaced[0]
 
     def heuristics(self, grammar):
+        """Внесение изменений в словарь {граммема:[морфемы]}"""
         no_adj_noun = {'ая', 'яя', 'ее', 'ое', 'и', 'ы', 'ев', 'ей', 'ем',
                        'ом', 'ов', 'ет', 'ли', 'ла', 'ло', 'ной', 'ни'}
         no_verb = {'и'}
@@ -126,7 +144,9 @@ class Rulebook:
 
 
 class Allomorphs(kuznec):
+    """Модуль для работы с алломорфами по словарю Кузнецовой"""
     def __init__(self):
+        """Собирает словарь {лемма:[алломорфы корня]}"""
         self.allomorphs = defaultdict(str,
                                       {item: (self.worddict[item][place]['allo']
                                               if self.worddict[item][place]['allo'] != ['']
@@ -140,7 +160,7 @@ class Allomorphs(kuznec):
                                       )
 
     def vowel_change(self, string):
-
+        """Изменяет список алломорфов для учёта фонологии"""
         vowel_pairs = {'о': '[ао]', 'а': '[ао]',
                        'и': '[ие]', 'ы': '[ыи]',
                        'е': '[ие]', 'я': '[еяи]'}
@@ -151,6 +171,7 @@ class Allomorphs(kuznec):
                         for letter in string])
 
     def is_allomorph(self, error_roots, lemma):
+        """Извлекает корень леммы и сравнивает его со списком алломорфов корня ошибочного слова"""
 
         choice = '|'.join(self.allomorphs[lemma])
 
@@ -179,16 +200,23 @@ class Allomorphs(kuznec):
         
 
 class Morphchecker:
+    """Коррекция морфологических ошибок"""
+
     def __init__(self):
+
         self.pm2 = pymorphy2.MorphAnalyzer()
         self.rb = Rulebook()
         self.al = Allomorphs()
 
     def spellcheck(self, word):
+        """Возвращает кортеж:
+        ([исправления], False) для слова с ошибкой
+        ([само слово], True) для слова без ошибки"""
         spellchecked = check_word(word, ' ', ' ',
                                   accent_mistakes={},
                                   big_ru={},
                                   multiword=False)
+        print("СПЕЛЛЧЕК: %s" % spellchecked['correct'])
         if spellchecked['correct']:
             return spellchecked['correct'], True
         else:
@@ -197,9 +225,11 @@ class Morphchecker:
                     if ' ' not in mistake], False
 
     def get_root_and_tags(self, word):
-
+        """Слово делится на морфемы. Извлекается корень и окончание.
+        Определяются возможные граммемы для окончания"""
         morphs = morphSplitnCheck(word)
 
+        flexion = ''
         roots = []
         if hasattr(morphs, 'extraRoot') and morphs.extraRoot:
             roots.append(morphs.extraRoot[0])
@@ -217,28 +247,30 @@ class Morphchecker:
 
         tags = self.rb.tags_for_morph(flexion)
         if hasattr(morphs, 'reflexive'):
-            tags = {tag for tag in tags if 'V' in tag}
+            tags = {tag for tag in tags if 'V' in tag} # оставляем только граммемы для глаголов, если есть постфикс
 
         print('ВОЗМОЖНЫЕ КОРНИ: %s' % str(roots))
         print('ОКОНЧАНИЕ: %s' % flexion)
         print('ПОКАЗАТЕЛИ ОКОНЧАНИЯ: %s' % tags)
 
-        return roots, tags, flexion
+        return roots, tags
 
     def pos_check(self, lemma, tags):
+        """Сравнивает часть речи исправления с граммемами окончания"""
         if self.rb.pos_for_lemma(lemma) in {tag[0] for tag in tags}:
             return True
         else:
             return False
 
     def lemma_merge(self, variants):
+        """Лемматизирует выдачу спеллчекера. Объединяет одинаковые леммы"""
         lemmas = set()
         for variant in variants:
             variant = re.sub('[^а-яА-Я]', ' ', variant)
             parsed = self.pm2.parse(variant)[0]
             tag = parsed.tag
 
-            if 'PRTF' in tag or 'PRTS' in tag:
+            if 'PRTF' in tag or 'PRTS' in tag: # причастия и деепричастия лемматизируются в форму причастия м.р. ед.ч. и.п.
                 lemmas.add(parsed.inflect({'sing', 'nomn', 'masc'}).word.replace('ё', 'е'))
             else:
                 lemmas.add(parsed.normalized.word.replace('ё', 'е'))
@@ -252,10 +284,14 @@ class Morphchecker:
         return list(lemmas)
 
     def edit_distance(self, word, suggestions):
+        """Вычисляет расстояние Левенштейна между каждыи исправлением и ошибочным словом
+        Сортирует по возрастанию"""
         return sorted([(pylev.levenshtein(word, suggestion), suggestion)
                        for suggestion in suggestions])
 
-    def locate(self, suggest, error):
+    def locate(self, suggestion, error):
+        """Сравнивает исправление с ошибочным словом. Находит лишние, недостающие или изменённые морфемы."""
+
         suggest_morphs = morphSplitnCheck(suggest).morphList
         error_morphs = morphSplitnCheck(error).morphList
         print(suggest_morphs)
@@ -271,20 +307,22 @@ class Morphchecker:
         return Location(suggest=suggest, altered=altered, added=added, removed=removed)
 
     def mcheck(self, word):
+        """Основной алгоритм"""
+
         word = word.replace('ё', 'е')
         print('ПРОВЕРЯЕМ СЛОВО: %s' % word)
 
         spellchecked, is_correct = self.spellcheck(word)
 
         if is_correct == True:
-            suggestions = spellchecked
+            suggestions = [(0, spellchecked[0])]
         else:
             suggestions = []
 
             spellchecked = list(set(spellchecked).union(context_rules(word)))
             print('СПЕЛЛЧЕК: %s' % spellchecked + '\n')
 
-            roots, tags, flexion = self.get_root_and_tags(word)
+            roots, tags = self.get_root_and_tags(word)
 
             for lemma in self.lemma_merge(spellchecked):
                 if self.pos_check(lemma, tags):
@@ -300,9 +338,6 @@ class Morphchecker:
                 else:
                     print('У  СЛОВА %s НЕ ТА ЧАСТЬ РЕЧИ ' %lemma)
 
-            """if not suggestions:
-                suggestions = spellchecked"""
-
             suggestions = self.edit_distance(word, suggestions)
             print('ИСПРАВЛЕНИЯ: %s \n' % suggestions)
             if suggestions:
@@ -311,9 +346,20 @@ class Morphchecker:
                                for suggestion in suggestions
                                if suggestion[0] == min_ed[0]]
 
-        return [self.locate(suggestion[1]) for suggestion in suggestions]
+        return suggestions
+
+    def analyse(self, suggestions):
+        """Локализация ошибки в ошибочном слове на основе исправления"""
+        error_morphs = morphSplitnCheck(word).morphList
+        location = [self.locate(suggestion[1], error_morphs)
+                    for suggestion in suggestions
+                    if suggestion[0] != 0]
+        message = "Если {0} - правильное исправление, " \
+                  "то морфема {1} употреблена вместо морфемы {2}".format(location.suggest, location.added, location.removed)
+        print(message)
 
     def tokenize(self, text):
+        """Токенизация перед обработкой текста"""
         import string
         text = text.lower().split()
         return [token.strip(string.punctuation).replace('ё', 'е')
@@ -322,9 +368,12 @@ class Morphchecker:
     def text_mcheck(self, text):
         return [(word, self.morphcheck(word)) for word in self.tokenize(text)]
 
-    def file_mcheck(self, filename):
-        with open(filename, 'r', encoding='utf-8') as file:
-            return self.text_morphcheck(file.read())
+    def file_mcheck(self, filename1, filename2):
+        with open(filename1, 'r', encoding='utf-8') as f1:
+            mchecked = self.text_morphcheck(f1.read())
+        with open(filename2, 'r', encoding='utf-8') as f2:
+            for m in mchecked:
+                f1.write(m+'\n')
 
     def test(self):
 
