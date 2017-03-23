@@ -6,7 +6,7 @@ import difflib
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word
 from rules import context_rules
-from prjscript28 import morphSplitnCheck, kuznec
+from prjscript import morphSplitnCheck, kuznec
 from collections import defaultdict, namedtuple
 
 Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
