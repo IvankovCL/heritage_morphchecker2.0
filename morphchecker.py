@@ -6,7 +6,7 @@ import difflib
 sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
 from spell_checker import check_word
 from rules import context_rules
-from prjscript28 import morphSplitnCheck, kuznec
+from prjscript import morphSplitnCheck, kuznec
 from collections import defaultdict, namedtuple
 
 Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
@@ -393,6 +393,7 @@ class Morphchecker:
 
         print('DONE')
 
+<<<<<<< HEAD
 def options(argv):
     """
     USAGE
@@ -430,5 +431,8 @@ if __name__ == '__main__':
         def print(*args):
             pass
     options(sys.argv)
+=======
+m = Morphchecker()
+>>>>>>> 4cf2429bcc2c5638d3bd0320188a9d0656320fde
 
 pass

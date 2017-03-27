@@ -4,11 +4,13 @@
 
 
 
-from nltk.stem import snowball as stem
+#from nltk.stem import snowball as stem
+import morph_container
 #import time
 import pymystem3
 from collections import defaultdict
 import operator
+
 
 def printx(*args):
     pass
@@ -40,7 +42,7 @@ for line in mist:
 
 mist.close()
 """
-stmr = stem.RussianStemmer()
+stmr = morph_container.controller()
 
 # for item in mistakes:
  #   cash = []
