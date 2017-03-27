@@ -216,7 +216,7 @@ class Morphchecker:
                                   accent_mistakes={},
                                   big_ru={},
                                   multiword=False)
-        print("СПЕЛЛЧЕК: %s" % spellchecked['correct'])
+        print("СПЕЛЛЧЕК: %s" % spellchecked['mistake'])
         if spellchecked['correct']:
             return spellchecked['correct'], True
         else:
@@ -338,8 +338,11 @@ class Morphchecker:
                 else:
                     print('У  СЛОВА %s НЕ ТА ЧАСТЬ РЕЧИ ' %lemma)
 
+            if not suggestions:
+                suggestions = spellchecked
+
             suggestions = self.edit_distance(word, suggestions)
-            print('ИСПРАВЛЕНИЯ: %s \n' % suggestions)
+            sys.stdout.write('ИСПРАВЛЕНИЯ: %s \n' % suggestions)
             if suggestions:
                 min_ed = min(suggestions, key=lambda x: x[0])
                 suggestions = [suggestion
@@ -366,18 +369,21 @@ class Morphchecker:
                 for token in text if token not in string.punctuation]
 
     def text_mcheck(self, text):
-        return [(word, self.morphcheck(word)) for word in self.tokenize(text)]
+        return [(word, self.mcheck(word)) for word in self.tokenize(text)]
 
     def file_mcheck(self, filename1, filename2):
+        import io
         with open(filename1, 'r', encoding='utf-8') as f1:
-            mchecked = self.text_morphcheck(f1.read())
-        with open(filename2, 'r', encoding='utf-8') as f2:
-            for m in mchecked:
-                f1.write(m+'\n')
+            mchecked = self.text_mcheck(f1.read())
+            
+        f2 = open(filename2, 'w', encoding='utf-8')
+        for m in mchecked:
+            f2.write(str(m)+'\n')
+        f2.close()
 
     def test(self):
 
-        with open('for tests.txt', 'r', encoding='utf-8') as test:
+        with open('ttrue_examples.txt', 'r', encoding='utf-8') as test:
             all_words = [entry.strip('\n') for entry in test]
             results = {word: self.mcheck(word) for word in all_words}
 
@@ -387,6 +393,42 @@ class Morphchecker:
 
         print('DONE')
 
-m = Morphchecker()
+def options(argv):
+    """
+    USAGE
+    
+    python morphchecker.py [option1] [option2] [string]
+    or
+    python morphchecker.py input.txt output.txt
+
+    options 1:
+    -m [word]   word morphcheck
+    -s [word]   word spellcheck
+    -t [text]   text morphcheck
+
+    option 2:
+    --log       enable logs
+    """  
+
+    if len(argv) > 2:
+        m = Morphchecker()
+        if argv[1] == '-m':
+            m.mcheck(argv[2])
+        elif argv[1] == '-s':
+            m.spellcheck(argv[2])
+        elif argv[1] == '-t':
+            m.text_mcheck(argv[2])
+        print(argv[1])
+        print(argv[2])
+        if argv[1].endswith('.txt') and argv[2].endswith('.txt'):
+            m.file_mcheck(argv[1], argv[2])
+    else:
+        sys.stdout.write(options.__doc__)
+
+if __name__ == '__main__':
+    if '--log' not in sys.argv:
+        def print(*args):
+            pass
+    options(sys.argv)
 
 pass
