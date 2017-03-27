@@ -393,7 +393,6 @@ class Morphchecker:
 
         print('DONE')
 
-<<<<<<< HEAD
 def options(argv):
     """
     USAGE
@@ -431,8 +430,4 @@ if __name__ == '__main__':
         def print(*args):
             pass
     options(sys.argv)
-=======
-m = Morphchecker()
->>>>>>> 4cf2429bcc2c5638d3bd0320188a9d0656320fde
 
-pass
