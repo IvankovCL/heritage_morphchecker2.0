@@ -416,8 +416,6 @@ def options(argv):
             m.spellcheck(argv[2])
         elif argv[1] == '-t':
             m.text_mcheck(argv[2])
-        print(argv[1])
-        print(argv[2])
         if argv[1].endswith('.txt') and argv[2].endswith('.txt'):
             m.file_mcheck(argv[1], argv[2])
     else:
@@ -428,4 +426,3 @@ if __name__ == '__main__':
         def print(*args):
             pass
     options(sys.argv)
-
