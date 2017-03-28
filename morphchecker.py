@@ -397,9 +397,9 @@ def options(argv):
     """
     USAGE
     
-    python morphchecker.py [option1] [option2] [string]
+    python morphchecker.py [option1] [string] [option2]
     or
-    python morphchecker.py input.txt output.txt
+    python morphchecker.py input.txt output.txt [option2]
 
     options 1:
     -m [word]   word morphcheck
