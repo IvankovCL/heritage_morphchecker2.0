@@ -3,7 +3,7 @@ import pymorphy2
 import pylev
 import sys
 import difflib
-sys.path.append('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/spellchecker')
+sys.path.append('./spellchecker')
 from spell_checker import check_word
 from rules import context_rules
 from prjscript import morphSplitnCheck, kuznec
@@ -27,8 +27,7 @@ class Rulebook:
 
     def __init__(self):
         """Чтение файлов"""
-        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.dic', 'r',
-                  encoding='UTF-8') as lines:
+        with open('./resources/ru_RU.dic', 'r', encoding='UTF-8') as lines:
             wordlist = [line.split('/') for line in lines if '/' in line]
 
         self.codes_for_lemma = defaultdict(list,
@@ -36,8 +35,7 @@ class Rulebook:
                                             for entry in wordlist}
                                            )
 
-        with open('C:/Users/Ivankov/Documents/GitHub/heritage_morphchecker2.0/resources/ru_RU.aff', 'r',
-                  encoding='UTF-8') as raw:
+        with open('./resources/ru_RU.aff', 'r', encoding='UTF-8') as raw:
             sfx_rules = [line.split() for line in raw
                          if 'SFX' in line and ' Y ' not in line]
 
