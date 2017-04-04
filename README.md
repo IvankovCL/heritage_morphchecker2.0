@@ -4,7 +4,28 @@
 ### Статья
 Morphchecker for non-standard data: a tool for morphological error correction in learner corpora https://docs.google.com/document/d/1_QR2Us4znALsUEjiOh2pw3m8Y0PD-Fb0KKO8EAoXPGc/edit?usp=sharing
 
-### Инструкция
+### Запуск
+Прежде всего необходимо установить дистрибутив Anaconda. Скачать можно по этой ссылке https://www.continuum.io/downloads#windows (выбрать Python 3.6 version 32-BIT INSTALLER).
+
+Затем через командную строку установить необходимые для работы программы модули:
+```
+pip install pymystem3 pymorphy2 pylev enchant
+```
+Использовать программу можно в командной строке или запустив файл morphchecker.py в Anaconda:
+
+#### Интерфейс командной строки
+```
+    python morphchecker.py [option1] [string] [option2]
+    or
+    python morphchecker.py input.txt output.txt [option2]
+    options 1:
+    -m [word]   word morphcheck
+    -s [word]   word spellcheck
+    -t [text]   text morphcheck
+    option 2:
+    --log       enable logs
+```
+#### Использование в Anaconda
 Собственно коррекция морфологических ошибок:
 ```
 >>> m = Morphchecker()
@@ -34,16 +55,6 @@ Morphchecker for non-standard data: a tool for morphological error correction in
 - Машиночитаемая версия словаря морфем А.И. Кузнецовой, содержащий информацию о входящих в слово (в форме именительного падежа) морфемах и их алломорфах (resources/umorphodict2.csv)
 - Словарь Hunspell, содержащий правила изменения леммы слова во все возможные для него формы (resources/ru_RU.dic; resources/ru_RU.aff)
 
-### Необходимые модули
-Для работы системы необходимо установить:
-- nltk
-- pymystem3
-- pymorphy2
-- pylev
-
-Кроме того для работы модуля орфографии понадобятся:
-- enchant
-- numpy
 
 ### Основной алгоритм
 1. Чтение файлов словарей. 
