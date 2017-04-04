@@ -5,7 +5,7 @@
 Morphchecker for non-standard data: a tool for morphological error correction in learner corpora https://docs.google.com/document/d/1_QR2Us4znALsUEjiOh2pw3m8Y0PD-Fb0KKO8EAoXPGc/edit?usp=sharing
 
 ### Запуск
-Прежде всего необходимо установить дистрибутив Anaconda. Скачать можно по этой ссылке https://www.continuum.io/downloads#windows (выбрать Python 3.6 version 32-BIT INSTALLER).
+Прежде всего необходимо установить дистрибутив Anaconda. Скачать можно по ссылке: https://www.continuum.io/downloads#windows (выбрать Python 3.6 version 32-BIT INSTALLER).
 
 Затем через командную строку установить необходимые для работы программы модули:
 ```
