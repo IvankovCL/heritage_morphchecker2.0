@@ -1,11 +1,11 @@
 # Morphchecker     
-Система обнаружения и коррекции морфологических ошибок для корпуса эритажного русского языка Russian Learner Corpus http://web-corpora.net/RLC
+Модуль Python 3.6 для обнаружения и коррекции морфологических ошибок 
 
 ### Статья
 Morphchecker for non-standard data: a tool for morphological error correction in learner corpora https://docs.google.com/document/d/1_QR2Us4znALsUEjiOh2pw3m8Y0PD-Fb0KKO8EAoXPGc/edit?usp=sharing
 
 ### Запуск
-Прежде всего необходимо установить дистрибутив Anaconda. Скачать можно по ссылке: https://www.continuum.io/downloads#windows (выбрать Python 3.6 version 32-BIT INSTALLER).
+Прежде всего необходимо установить дистрибутив Anaconda. Скачать можно по ссылке: https://vk.com/away.php?utf=1&to=https%3A%2F%2Frepo.continuum.io%2Farchive%2FAnaconda3-4.3.1-Windows-x86.exe
 
 Затем через командную строку установить необходимые для работы программы модули:
 ```
