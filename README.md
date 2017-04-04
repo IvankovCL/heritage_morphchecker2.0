@@ -15,15 +15,17 @@ pip install pymystem3 pymorphy2 pylev enchant
 
 #### Интерфейс командной строки
 ```
-    python morphchecker.py [option1] [string] [option2]
-    or
-    python morphchecker.py input.txt output.txt [option2]
-    options 1:
-    -m [word]   word morphcheck
-    -s [word]   word spellcheck
-    -t [text]   text morphcheck
-    option 2:
-    --log       enable logs
+    python morphchecker.py [option1] [string]    
+    # для исправления орфографических или морфологических ошибок в слове или тексте (определяется с помощью options)    
+    
+    python morphchecker.py input.txt output.txt
+    # для исправления морфологических ошибок в текстовом файле 
+    
+    options:
+    -m [word]   исправление морфологических ошибок в слове
+    -s [word]   исправление орфографичкских ошибок в слове
+    -t [text]   исправление морфологических ошибок в тексте
+
 ```
 #### Использование в Anaconda
 Собственно коррекция морфологических ошибок:
