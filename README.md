@@ -7,6 +7,8 @@ Morphchecker for non-standard data: a tool for morphological error correction in
 ### Запуск
 Прежде всего необходимо установить дистрибутив Anaconda.
 
+Для корректной работы модуля необходима 32х-битная версия Anaconda / Python 3.6.
+
 Скачать можно по ссылке: https://repo.continuum.io/archive/Anaconda3-4.3.1-Windows-x86.exe
 
 Затем через командную строку установить необходимые для работы программы модули:
