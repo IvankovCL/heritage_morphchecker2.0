@@ -13,7 +13,7 @@ Morphchecker for non-standard data: a tool for morphological error correction in
 
 Затем через командную строку установить необходимые для работы программы модули:
 ```
-pip install pymystem3 pymorphy2 pylev enchant
+pip install pymystem3 pymorphy2 pylev pyenchant
 ```
 Использовать программу можно в командной строке или запустив файл morphchecker.py в Anaconda:
 
