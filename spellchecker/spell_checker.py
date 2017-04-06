@@ -9,6 +9,7 @@ from rules import rules_back, context_rules
 import numpy as np
 from collections import Counter
 from nltk.metrics import edit_distance
+from shutil import copyfile
 
 # import matplotlib.pyplot as plt
 
@@ -20,6 +21,9 @@ def disable_pprint(*args):
 
 mystem = Mystem()
 enchant.set_param("enchant.aspell.dictionary.path", "./aspell6-ru-0.99f7-1")
+if not enchant.dict_exists('ru_RU'):
+    copyfile('./resources/aspell/ru_RU.dic', os.path.dirname(enchant.__file__).replace('\\', '/') + '/share/enchant/myspell/ru_RU.dic')
+    copyfile('./resources/aspell/ru_RU.aff', os.path.dirname(enchant.__file__).replace('\\', '/') + '/share/enchant/myspell/ru_RU.aff')
 #     res = list(''.join(o) for o in product(*d))
 #     res.remove(low)
 

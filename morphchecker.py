@@ -390,6 +390,8 @@ class Morphchecker:
 
         print('DONE')
 
+pass
+
 def options(argv):
     """
     USAGE
@@ -406,6 +408,7 @@ def options(argv):
     option 2:
     --log       enable logs
     """
+
 
 
     if len(argv) > 2:
@@ -426,3 +429,4 @@ if __name__ == '__main__':
         def print(*args):
             pass
     options(sys.argv)
+

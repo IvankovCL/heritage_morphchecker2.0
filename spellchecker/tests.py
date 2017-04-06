@@ -6,6 +6,7 @@ from pymystem3 import Mystem
 import subprocess
 import time
 import enchant
+from shutil import copyfile
 
 
 def ed_1(word, score, table):
@@ -145,6 +146,9 @@ def aspell(string):
 
     '''
     enchant.set_param("enchant.aspell.dictionary.path", "./aspell6-ru-0.99f7-1")
+    if not enchant.dict_exists('ru_RU'):
+        copyfile('./resources/aspell/ru_RU.dic', os.path.dirname(enchant.__file__).replace('\\', '/') + '/share/enchant/myspell/ru_RU.dic')
+        copyfile('./resources/aspell/ru_RU.aff', os.path.dirname(enchant.__file__).replace('\\', '/') + '/share/enchant/myspell/ru_RU.aff')
     d = enchant.Dict("ru_RU")
     if d.check(string):      # aspell says OK
         # print('aspell says OK')
