@@ -3,6 +3,7 @@ import pymorphy2
 import pylev
 import sys
 import difflib
+import os
 sys.path.append('./spellchecker')
 from spell_checker import check_word
 from rules import context_rules
@@ -216,7 +217,8 @@ class Morphchecker:
                                   multiword=False)
         print("СПЕЛЛЧЕК: %s" % spellchecked['mistake'])
         if spellchecked['correct']:
-            return spellchecked['correct'], True
+            spellchecked = list(set(spellchecked['correct']).union(context_rules(word)))
+            return spellchecked, True
         else:
             return [mistake
                     for mistake in spellchecked['mistake']
@@ -317,9 +319,6 @@ class Morphchecker:
         else:
             suggestions = []
 
-            spellchecked = list(set(spellchecked).union(context_rules(word)))
-            print('СПЕЛЛЧЕК: %s' % spellchecked + '\n')
-
             roots, tags = self.get_root_and_tags(word)
 
             for lemma in self.lemma_merge(spellchecked):
@@ -406,7 +405,8 @@ def options(argv):
 
     option 2:
     --log       enable logs
-    """  
+    """
+
 
     if len(argv) > 2:
         m = Morphchecker()

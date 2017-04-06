@@ -1,4 +1,4 @@
-import re, sys
+import re, sys, os
 # from itertools import product
 from tests import hunspell, aspell, csv2transform, lookup_pymystem
 from pymystem3 import Mystem
@@ -12,9 +12,14 @@ from nltk.metrics import edit_distance
 
 # import matplotlib.pyplot as plt
 
+def disable_print(*args):
+    pass
+
+def disable_pprint(*args):
+    pass
 
 mystem = Mystem()
-enchant.set_param("enchant.aspell.dictionary.path", "C:/Users/Ivankov/Desktop/RLC/emeshch-spell-checker-a264623eaa3c/aspell6-ru-0.99f7-1")
+enchant.set_param("enchant.aspell.dictionary.path", "./aspell6-ru-0.99f7-1")
 #     res = list(''.join(o) for o in product(*d))
 #     res.remove(low)
 
@@ -32,17 +37,17 @@ def old_process(test):
             lemma, pos, ipm, r, d, doc = line.split('\t')
             big_ru[lemma + ',' + pos] = ipm
 
-    print('START:', test)
-    print('aspell')
-    pprint(aspell(test))
+    disable_print('START:', test)
+    disable_print('aspell')
+    disable_pprint(aspell(test))
 
     # проверяем hunspell
     is_wrong, correct = hunspell(test)
     if not is_wrong:
-        print('hunspell says OK')
+        disable_print('hunspell says OK')
         # говорит, что ошибки нет.
         # проверим на редкость: лемматизируем и найдём в частотнике
-        print('check if rare')
+        disable_print('check if rare')
         mystemmed = mystem.analyze(test)
         lemma_mystem = mystemmed[0]['analysis'][0]['lex']
         pos_mystem = mystemmed[0]['analysis'][0]['gr'].split('=')[0].split(',')[0].lower()
@@ -51,17 +56,17 @@ def old_process(test):
             print(test, corr_ipm)
         except:
             # нет в частотном словаре, наверное, редкое.
-            print('not in the freq_dict', test)
+            disable_print('not in the freq_dict', test)
 
     else:
-        print('hunspell says mistake')
+        disable_print('hunspell says mistake')
         # hunspell говорит, что есть ошибка, и даёт варианты
         if len(correct) > 0:
             ans = []
-            print('check if rare')
+            disable_print('check if rare')
             for corr in correct:
                 # проверить редкость предложенных вариантов
-                # print('check if rare')
+                # disable_print('check if rare')
                 mystemmed = mystem.analyze(corr)
                 lemma_mystem = mystemmed[0]['analysis'][0]['lex']
                 pos_mystem = mystemmed[0]['analysis'][0]['gr'].split('=')[0].split(',')[0].lower()
@@ -70,12 +75,12 @@ def old_process(test):
                     # print(corr, corr_ipm, 'ipm')
                     ans.append((corr, float(corr_ipm)))
                 except:
-                    # print('not in the dictionary', corr)
+                    # disable_print('not in the dictionary', corr)
                     pass
-            pprint(sorted(ans, key=lambda x: x[1], reverse=True))
+            disable_pprint(sorted(ans, key=lambda x: x[1], reverse=True))
 
         else:
-            print('hunspell gives nothing')
+            disable_print('hunspell gives nothing')
             # hunspell говорит, что есть ошибка, вариантов нет
             # проверить майстемом
             is_wrong_mystem = lookup_pymystem(test)
@@ -83,9 +88,9 @@ def old_process(test):
                 correct.append(test)
             else:
                 # действительно ошибка, предложить варианты
-                print('\tno suggestions by mystem')
-            print('final corrections')
-            pprint(correct)
+                disable_print('\tno suggestions by mystem')
+            disable_print('final corrections')
+            disable_pprint(correct)
 
 
 def olga_test():
@@ -99,24 +104,24 @@ def olga_test():
         for line in lines:
             m, corr = line.split('\t')
             mistakes[m] = corr
-    print('error dict in memory, took %s sec' % (time.time() - start_time))
+    disable_print('error dict in memory, took %s sec' % (time.time() - start_time))
     with open('test-set.txt') as f_in:
         words = f_in.readlines()
         for w in words:
-            print('-'*20)
+            disable_print('-'*20)
             w = w.strip()
             print(w)
             w_test = w.strip().lower()
             # process(ws)
             is_mistake, aspell_suggests = aspell(w_test)
             if is_mistake:
-                print('ASPELL')
-                print('mistake', '\n'.join(aspell_suggests))
+                disable_print('ASPELL')
+                disable_print('mistake', '\n'.join(aspell_suggests))
                 try:
-                    print('RULES')
+                    disable_print('RULES')
                     print(mistakes[w_test])
                 except:
-                    print('NOT IN THE DICTIONARY')
+                    disable_print('NOT IN THE DICTIONARY')
 
 
 def is_english(word):
@@ -147,7 +152,7 @@ def prepare_accent_mistakes():
             m, corr = line.split('\t')
             mistakes[m] = corr
             i += 1
-    print('error dict in memory, took %s sec' % (time.time() - start_time))
+    disable_print('error dict in memory, took %s sec' % (time.time() - start_time))
     return mistakes
 
 
@@ -156,7 +161,7 @@ def check_boundaries(word, prev_w, next_w):
     слепить с предыдущим, следующим, пред и след и проверить всё аспеллом
     если такое слово есть - выдать его, если нет — первые два предложения аспелла
     '''
-    print('CHECK BOUNDARIES: prev word next:', [prev_w, word, next_w])
+    disable_print('CHECK BOUNDARIES: prev word next:', [prev_w, word, next_w])
     new = []
     boundaries = list()
     boundaries.append(prev_w + word)
@@ -165,10 +170,10 @@ def check_boundaries(word, prev_w, next_w):
     boundaries.append('-'.join((word, next_w)))
     boundaries.append(prev_w + word + next_w)
     boundaries.append('-'.join((prev_w, word, next_w)))
-    print('bound vars:', boundaries)
+    disable_print('bound vars:', boundaries)
     for x in boundaries:
         is_mistake, suggestions = aspell(x)
-        # print('boundaries::', x, is_mistake, suggestions)
+        # disable_print('boundaries::', x, is_mistake, suggestions)
         if not is_mistake:
             new.append(x)
         else:
@@ -179,7 +184,7 @@ def check_boundaries(word, prev_w, next_w):
         if word.endswith(p) and len(p) > 0:
             x = word.replace(p, '')
             new.append(x+' '+p)
-    print('boundaries:', new)
+    disable_print('boundaries:', new)
     return list(set(new))
 
 
@@ -192,18 +197,18 @@ def heritage_rules(word, prev_w, next_w, accent_mistakes, multiword=True):
     mistake = []
     if multiword:
         mistake += check_boundaries(word, prev_w, next_w)
-    # print('1', mistake)
+    # disable_print('1', mistake)
     # небольшой контекст
     mistake += context_rules(word)
-    # print('2', mistake)
+    # disable_print('2', mistake)
     try:
         correction = accent_mistakes[word]
-        print('accent rules:', correction)
+        disable_print('accent rules:', correction)
         mistake.append(correction)
     except KeyError:
-        print('not in the dict of artificial mistakes')
+        disable_print('not in the dict of artificial mistakes')
     # try:
-    # print('3', mistake)
+    # disable_print('3', mistake)
     bigram_rules = rules_back(word, ())  #bigram_rules = rules_back(word, (), all_combinations=True)
     for x in bigram_rules:
         is_wrong, asp = aspell(x)
@@ -211,10 +216,10 @@ def heritage_rules(word, prev_w, next_w, accent_mistakes, multiword=True):
             mistake.append(x)
         elif len(asp) >= 2:
             mistake += asp[:2]
-        print('bigram rules:', x, '-> asp (is_mistake, vars):', is_wrong, asp[:2])
+        disable_print('bigram rules:', x, '-> asp (is_mistake, vars):', is_wrong, asp[:2])
     # except:
-    #     print('ALARM', sys.exc_info()[0], 'word:', word)
-    # print('4', mistake)
+    #     disable_print('ALARM', sys.exc_info()[0], 'word:', word)
+    # disable_print('4', mistake)
 
     return mistake
 
@@ -223,7 +228,7 @@ def freq_filter(string, big_ru):
     '''
     if rare return False, else True
     '''
-    # print('check if rare:', string)
+    # disable_print('check if rare:', string)
     # mystemmed = mystem.analyze(string)
     # print(mystemmed)
     try:
@@ -237,7 +242,7 @@ def freq_filter(string, big_ru):
             return [string, False, ipm]
     except:
         # нет в частотном словаре, наверное, редкое.
-        # print('not in the freq_dict', string)
+        # disable_print('not in the freq_dict', string)
         return [string, False, -1]
 
 
@@ -257,19 +262,19 @@ def sort_heritage_suggestions(mistake, big_ru):
     freq_more_than_once = [freq_filter(s, big_ru) for s in more_than_once]
     # print(freq_more_than_once)
     sorted_more_than_once = [x[0] for x in sorted(freq_more_than_once, key=lambda x: float(x[2]), reverse=True)]
-    # print('more than once:', sorted_more_than_once)
+    # disable_print('more than once:', sorted_more_than_once)
 
     freq_only_once = [freq_filter(s, big_ru) for s in only_once]
     freq_from_once = [w for w in filter(lambda x: x[1], freq_only_once)]
     sorted_only_once = [x[0] for x in sorted(freq_from_once, key=lambda x: float(x[2]), reverse=True)]
 
     # sorted(student_tuples, key=lambda student: student[2])
-    print('freq_from_once', freq_only_once)
+    disable_print('freq_from_once', freq_only_once)
     if len(sorted_only_once) > 5:
         sorted_only_once = sorted_only_once[:5]
 
-    print('more than once:', sorted_more_than_once)
-    print('sorted_only_once', sorted_only_once)
+    disable_print('more than once:', sorted_more_than_once)
+    disable_print('sorted_only_once', sorted_only_once)
     return sorted_more_than_once + sorted_only_once
 
 
@@ -284,14 +289,14 @@ def check_word(word, prev_w, next_w, accent_mistakes, big_ru, multiword):
     :param big_ru: то же, что и в check_text
     :return: словарь {'correct': [...], 'mistake': [...], 'aspell': [...]} — см. check_text
     '''
-    print('check word (prev - word - next):', [prev_w, word, next_w])
+    disable_print('check word (prev - word - next):', [prev_w, word, next_w])
     mistake = []
     result_dict = {'correct': [], 'mistake': [], 'aspell': []}
     # проверяем аспеллом
     is_mistake, aspell_suggests = aspell(word)
     if not is_mistake:
         # ok или real word mistake
-        print('aspell: OK')
+        disable_print('aspell: OK')
         result_dict['correct'].append(word)
         print(freq_filter(word, big_ru))
         if freq_filter(word, big_ru)[1]:
@@ -303,7 +308,7 @@ def check_word(word, prev_w, next_w, accent_mistakes, big_ru, multiword):
     else:
         # аспелл говорит, что есть ошибка
         # result_dict['correct'] = []
-        print('aspell: is mistake;', aspell_suggests)
+        disable_print('aspell: is mistake;', aspell_suggests)
 
         # предложения аспелла
         result_dict['aspell'] = aspell_suggests
@@ -312,22 +317,22 @@ def check_word(word, prev_w, next_w, accent_mistakes, big_ru, multiword):
         # for s in aspell_suggests:
         #     print(s)
         #     freq_asp.append(freq_filter(s, big_ru))
-        print('freq asp:', freq_asp)
+        disable_print('freq asp:', freq_asp)
         # freq_from_aspell = [w[0] for w in filter(lambda x: x[1], freq_asp)]
         asp_sorted = [x[0] for x in sorted(freq_asp, key=lambda x: float(x[2]), reverse=True)]
-        print('ASPELL sorted', asp_sorted)
+        disable_print('ASPELL sorted', asp_sorted)
         if len(asp_sorted) > 5:
             asp_sorted = asp_sorted[:5]
 
         # asp_to_mistake - это то, что будем объединять с нашими предложениями и писать в ответ
         asp_to_mistake = aspell_suggests[:2] + asp_sorted
-        print('asp_to_mistake', asp_to_mistake)
+        disable_print('asp_to_mistake', asp_to_mistake)
         # теперь наши дополнения
         mistake = []
         mistake += heritage_rules(word, prev_w, next_w, accent_mistakes, multiword)
-        print('heritage_rules', mistake)
+        disable_print('heritage_rules', mistake)
         # сортируем наши исправления
-        print('sort_heritage_suggestions(mistake, big_ru)', sort_heritage_suggestions(mistake, big_ru))
+        disable_print('sort_heritage_suggestions(mistake, big_ru)', sort_heritage_suggestions(mistake, big_ru))
         # ответ
         result_dict['mistake'] = sort_heritage_suggestions(mistake, big_ru) + asp_to_mistake
 
@@ -336,8 +341,8 @@ def check_word(word, prev_w, next_w, accent_mistakes, big_ru, multiword):
 #check_word('рисски')
 
 # result = spellll('jлa')
-# print('== RESULT ==')
-# pprint(result)
+# disable_print('== RESULT ==')
+# disable_pprint(result)
 
 
 def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multiword=False):
@@ -359,12 +364,12 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
     else:
         text = in_arg.strip()
 
-    print('='*30+'\n'+'START:')
+    disable_print('='*30+'\n'+'START:')
     checked_text = []       # здесь будет скапливаться ответ -- список словарей (по словарю на слово)
 
     # загружаем частотник
     '''if big_ru == {}:
-        print('preparing freq dict...')
+        disable_print('preparing freq dict...')
         big_ru = {}
         with open('freqrnc2011.csv') as rus:
             ru = rus.readlines()[1:]
@@ -373,7 +378,7 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
                 big_ru[lemma + ',' + pos] = ipm     # слово идентифицируется по лемме и части речи, потому что бывают омонимы
     # загружаем словарь искусственных ошибок
     if accent_mistakes == {}:
-        print('preparing accent mistakes...')
+        disable_print('preparing accent mistakes...')
         accent_mistakes = prepare_accent_mistakes()'''
 
     # загружаем правила перевода латиницы в кириллицу
@@ -392,44 +397,44 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
 
     # токенизируем
     tokens = text_punct.split(' ')
-    print('%d word(s)' % len(tokens))
+    disable_print('%d word(s)' % len(tokens))
 
     # для нулевого токена предыдущий - пробел, для последнего следующий - пробел
     tokens.insert(0, ' ')
     tokens.insert(len(tokens), ' ')
 
-    # print('TOKENS:', tokens[1:-1])
+    # disable_print('TOKENS:', tokens[1:-1])
     for i, token in enumerate(tokens[1:-1]):    # не анализируем пробелы, которые вставили только что
         k = i+1         # настоящие индексы массива tokens
-        print('\ntoken:', k, token)
+        disable_print('\ntoken:', k, token)
         suggestions = {'correct': [], 'mistake': [], 'aspell': []}  # результаты для этого токена
         word = token.strip().lower()            # к нижнему регистру
         word = re.sub('ё', 'е', word)           # замена ё на е
         if len(word) > 0:                       # если не пустая строка
             is_en, num_lat = is_english(word)   # есть ли в слове латиница?
-            # print('# lat =', num_lat)
+            # disable_print('# lat =', num_lat)
             if num_lat == len(word) or word in punct:
                 # английское слово или знак пунктуации, не проверяем
-                print('english or punct')
+                disable_print('english or punct')
                 checked_text.append({'correct': [], 'aspell': [], 'mistake': []})
             elif num_lat == 0:
                 # всё слово кириллицей
-                print('all cyr')
-                print('prev-w-next:', [tokens[k-1], tokens[k], tokens[k+1]])
+                disable_print('all cyr')
+                disable_print('prev-w-next:', [tokens[k-1], tokens[k], tokens[k+1]])
                 suggestions = check_word(word, tokens[k-1], tokens[k+1], accent_mistakes, big_ru, multiword)
             else:
                 # есть латиница
-                print('cyr and lat')
+                disable_print('cyr and lat')
                 suggestions['aspell'] = aspell(word)[1]
                 # правим латиницу
                 temp_vars = rules_back(word, lat_table, all_combinations=False)
-                print('temp_cyr', temp_vars)
+                disable_print('temp_cyr', temp_vars)
                 cyr_vars = []
                 for replaced in temp_vars:
                     if not is_english(replaced)[0]:       # только кириллица
                         cyr_vars.append(replaced)
-                # print('== CYR ==')
-                print('cyr', cyr_vars)
+                # disable_print('== CYR ==')
+                disable_print('cyr', cyr_vars)
                 correct_vars, mistake_vars = [], []
                 # обработка каждого из кириллических вариантов
                 for cyr_var in cyr_vars:
@@ -437,7 +442,7 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
                     mistake_vars += result['mistake']
                     # suggestions['aspell'] += result['aspell']
                     correct_vars += result['correct']
-                    # print('cyr_k suggestions:', suggestions)
+                    # disable_print('cyr_k suggestions:', suggestions)
                 # только уникальные
                 mistake_vars = list(set(mistake_vars))
                 correct_vars = list(set(correct_vars))
@@ -449,7 +454,7 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
                 suggestions['correct'] = sorted(correct_vars, key=lambda x: edit_distance(x, word))
 
             checked_text.append(suggestions)
-    print('===RESULTS===')
+    disable_print('===RESULTS===')
     # пишем результаты в файл
     '''if '.txt' not in out_arg:
         out_arg = 'fout.txt'
@@ -457,10 +462,10 @@ def check_text(in_arg, out_arg='fout.txt', accent_mistakes={}, big_ru={},  multi
         f_out.write('token\taspell_correct\tfull_aspell\ther')'''
     for t, r in zip(tokens[1:-1], checked_text):
             r['mistake'] = list(set(r['mistake']))
-        # pprint('\t'.join([t, ','.join(r['correct']), ','.join(r['mistake'])]))
+        # disable_pdisable_print('\t'.join([t, ','.join(r['correct']), ','.join(r['mistake'])]))
             f_out.write('\n' + t + '\t' + ','.join(r['correct']) + '\t' + ','.join(r['aspell']) + '\t' + ','.join(r['mistake']))
-    pprint(checked_text)
-    print('='*30)
+    disable_pprint(checked_text)
+    disable_print('='*30)
     if not multiword:
         return checked_text[0]
     else:
@@ -477,14 +482,14 @@ def evaluate(in_arg, out_arg):
     входной файл
     word \t human_correct
     '''
-    print('preparing freq dict...')
+    disable_print('preparing freq dict...')
     big_ru = {}
     with open('freqrnc2011.csv') as rus:
         ru = rus.readlines()[1:]
         for line in ru:
             lemma, pos, ipm, r, d, doc = line.split('\t')
             big_ru[lemma + ',' + pos] = ipm
-    print('preparing accent mistakes...')
+    disable_print('preparing accent mistakes...')
     accent_mistakes = prepare_accent_mistakes()
     # accent_mistakes = {}
     with open(in_arg) as test_f:
@@ -530,19 +535,19 @@ def evaluate(in_arg, out_arg):
             #     pass
         asp_numpy = np.array(asp_where)
         # print(total, her, her_len, asp, asp_short, asp_len, asp_ok_true)
-        print('='*50)
-        print('heritage/total', round(her/total_mistakes, 4))
-        print('aspell/total', round(asp/total_mistakes, 4))
-        print('aspell_short(first two)/total', round(asp_short/total_mistakes, 4))
-        print('heritage/aspell', round(her/asp, 7))
-        print('heritage_length/total', round(her_len/total_mistakes, 4))
-        print('aspell_length/total', round(asp_len/total_mistakes, 4))
-        print('aspell percentiles', np.percentile(asp_numpy, 25), np.percentile(asp_numpy, 50), np.percentile(asp_numpy, 75))
-        print('aspell_index_of_correct(0123..)', asp_where)
-        print('aspell_length', asp_len_list)
-        print('heritage_length_list', her_len_list)
+        disable_print('='*50)
+        disable_print('heritage/total', round(her/total_mistakes, 4))
+        disable_print('aspell/total', round(asp/total_mistakes, 4))
+        disable_print('aspell_short(first two)/total', round(asp_short/total_mistakes, 4))
+        disable_print('heritage/aspell', round(her/asp, 7))
+        disable_print('heritage_length/total', round(her_len/total_mistakes, 4))
+        disable_print('aspell_length/total', round(asp_len/total_mistakes, 4))
+        disable_print('aspell percentiles', np.percentile(asp_numpy, 25), np.percentile(asp_numpy, 50), np.percentile(asp_numpy, 75))
+        disable_print('aspell_index_of_correct(0123..)', asp_where)
+        disable_print('aspell_length', asp_len_list)
+        disable_print('heritage_length_list', her_len_list)
         if total - total_mistakes > 0:
-            print('asp_ok_true/total_mistakes', round(asp_ok_true/(total-total_mistakes), 4))
+            disable_print('asp_ok_true/total_mistakes', round(asp_ok_true/(total-total_mistakes), 4))
         if '.txt' in out_arg:
             f_out = open(out_arg, 'w')
         else:
@@ -585,6 +590,6 @@ if __name__ == "__main__":
             evaluate(sys.argv[2], sys.argv[3])
 
     else:
-        print('WRONG ARGUMENTS!\nto check a utf-8 text file:\npython3 spell_checker.py -text input_file.txt output_file.txt\n'
+        disable_print('WRONG ARGUMENTS!\nto check a utf-8 text file:\npython3 spell_checker.py -text input_file.txt output_file.txt\n'
               'to check a word:\npython3 spell_checker.py -word серёзьно output_file.txt\n'
               'to evaluate results given the gold standard:\npython3 spell_checker.py -evaluate golden.txt output_file.txt\n')
