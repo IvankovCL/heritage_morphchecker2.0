@@ -19,7 +19,7 @@ flask_app = Flask(__name__)
 
 def do_some_morphchecking(word):
     m = Morphchecker()
-    return m.mcheck(word)
+    return m.text_mcheck(word)
 
 
 @flask_app.route('/')

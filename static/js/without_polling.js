@@ -1,4 +1,5 @@
-$(document).ready(function () {    
+$(document).ready(function () {
+	document.title = 'Morphchecker';
     $('#demoButton').click(function () {
          $(this).hide();
          $('#demoForm').show();
