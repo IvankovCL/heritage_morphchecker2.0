@@ -215,14 +215,17 @@ class Morphchecker:
                                   accent_mistakes={},
                                   big_ru={},
                                   multiword=False)
-        print("СПЕЛЛЧЕК: %s" % spellchecked['mistake'])
+
         if spellchecked['correct']:
-            spellchecked = list(set(spellchecked['correct']).union(context_rules(word)))
-            return spellchecked, True
+            print("СПЕЛЛЧЕК: %s" % spellchecked['correct'])
+            return spellchecked['correct'], True
         else:
-            return [mistake
-                    for mistake in spellchecked['mistake']
-                    if ' ' not in mistake], False
+            print("СПЕЛЛЧЕК: %s" % spellchecked['mistake'])
+            without_context_rules = [mistake
+                                    for mistake in spellchecked['mistake']
+                                    if ' ' not in mistake]
+            with_context_rules = list(without_context_rules).union(context_rules(word))
+            return with_context_rules, False
 
     def get_root_and_tags(self, word):
         """Слово делится на морфемы. Извлекается корень и окончание.
