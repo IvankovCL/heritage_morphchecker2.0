@@ -224,7 +224,7 @@ class Morphchecker:
             without_context_rules = [mistake
                                     for mistake in spellchecked['mistake']
                                     if ' ' not in mistake]
-            with_context_rules = list(without_context_rules).union(context_rules(word))
+            with_context_rules = list(set(without_context_rules).union(context_rules(word)))
             return with_context_rules, False
 
     def get_root_and_tags(self, word):
