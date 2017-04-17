@@ -13,11 +13,11 @@
 
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
         <style>
-			
-			
+            
+            
             body {
                 padding-top: 50px;
-                padding-bottom: 20px;
+                padding-bottom: 5px;
                 background-color: white;
                 background: url(static/blurredbackground29.jpg) no-repeat center center fixed;
                 -webkit-background-size: cover;
@@ -27,14 +27,25 @@
             }
             .container {
                 background: rgba(0, 0, 0, 0);
+            }
+			button {
+				float:right;
+			}
+
+            .output {
+                float: left;
+                font-size: 5px;
+            }
+			error {
+                background-color: red;
+            }
 			
-			
-			
+            
         
-		</style>
+        </style>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     </head>
     <body>
         <!--[if lt IE 8]>
@@ -50,52 +61,46 @@
     </div>
     <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
       <ul class="nav navbar-nav">
-	          <li><a href="#">О проекте</a></li>
-	          <li><a href="#">Контакты</a></li>
+              <li><a href="#">О проекте</a></li>
+              <li><a href="#">Контакты</a></li>
     </nav>
   </div>
 </header>
 <br />
 <div class="container">
-    <div class="jumbotron" >
-	
+    <div class="jumbotron" >    
         <h1 align="center">Morphchecker</h1>
-		<p align="center">Сервис для обнаружения морфологических ошибок</p>
-		<input type="button" id="demoButton" name="demo" class="btn-lg btn-primary center-block" value="Демо" />
-	    <br />
-		<div class="container" id="demoForm" style="display: none">
-            <div class="col-md-6 col-md-offset-3">
-			   <input autocomplete=on size="15" class="form-control" type="text" id="txtInput" onfocus="this.value='';" placeholder="введите слово"/>
-			   <br />
-			   <button type="button" class="btn btn-default" id="send">Проверить</button><br />
-			   <br />
-			   <input type="text" class="form-control" id = "txtOutput" size="35" />
-          </div>
-       </div>
-    </div>
-	</div>
-	
+        <p align="center">Сервис для обнаружения морфологических ошибок</p>
+        <input type="button" id="demoButton" name="demo" class="btn-lg btn-primary center-block" value="Начать" />
+        <br />
+        <div class="container" id="demoForm" style="display: none">
+		    <div class="row">
+				<div class="col-md-3">
+				   <input type="file" name="img" id="openfile">
+				</div>
+				<div class="col-md-3">
+				   <button type="button" class="btn btn-default" id="send">Проверить</button><br />
+				   <br />
+				</div>
+				<div class="col-md-6">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<textarea rows="10" cols="65" class="form-control" placeholder="или введите текст" id="textInput"></textarea> 
+				</div>
+				<div class="col-md-6">          
+					<p class="output" id="textOutput">Здесь появится результат</p>              
+				</div>
+			</div>
+        </div>
+    </div>    
     <div class="container">
-      <div class="row" align="center">
-        <div class="col-md-4">
-          <h3>Исправляет орфографию</h3>
-          <p></p>
-        </div>
-        <div class="col-md-4">		  
-          <h3>Разделяет на морфемы</h3>
-          <p></p>		  	
-       </div>
-        <div class="col-md-4">
-          <h3>Определяет часть речи</h3>
-          <p></p> 
-        </div>
-      </div>
-      <hr>
       <footer>
         <p><a href="http://www.web-corpora.net/RLC/search/">&copy; Русский учебный корпус</p>
       </footer>
     </div> <!-- /container -->        
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script src="{{ url_for('static', filename='js/without_polling.js') }}"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/without_polli.js') }}"></script>
     </body>
 </html>
