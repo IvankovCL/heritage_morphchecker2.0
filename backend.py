@@ -40,12 +40,5 @@ def data():
          'result': str(task_id)
     })
 
-@flask_app.route('/show_file', methods=['GET', 'POST'])
-def show_file():
-    request.get_data()
-    given_file = request.data.decode('utf-8')
-
-    return 
-
 if __name__ == '__main__':
     flask_app.run(port=getuid() + ADDITIVE_FOR_UID, debug=True)
