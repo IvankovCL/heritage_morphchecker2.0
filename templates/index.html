@@ -76,7 +76,7 @@
         <div class="container" id="demoForm" style="display: none">
 		    <div class="row">
 				<div class="col-md-3">
-				   <input type="file" name="img" id="openfile">
+				   <input type="file" id="openfile">
 				</div>
 				<div class="col-md-3">
 				   <button type="button" class="btn btn-default" id="send">Проверить</button><br />
@@ -87,10 +87,10 @@
 			</div>
 			<div class="row">
 				<div class="col-md-6">
-					<textarea rows="10" cols="65" class="form-control" placeholder="или введите текст" id="textInput"></textarea> 
+					<textarea rows="10" cols="65" class="form-control" placeholder="введите текст" id="textInput"></textarea> 
 				</div>
 				<div class="col-md-6">          
-					<p class="output" id="textOutput">Здесь появится результат</p>              
+					<p class="output" id="textOutput"></p>              
 				</div>
 			</div>
         </div>
@@ -101,6 +101,30 @@
       </footer>
     </div> <!-- /container -->        
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script src="{{ url_for('static', filename='js/without_polli.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/without_polling.js') }}"></script>
+		<script>
+		var control = document.getElementById("openfile");
+		control.addEventListener("change", function(event) {
+			var i = 0,
+				files = control.files,
+				len = files.length;
+		 
+			for (; i < len; i++) {
+				
+				var reader = new FileReader();
+				reader.onload = function(event) {
+					var contents = event.target.result;
+					document.getElementById("textInput").value = contents;
+				}; 
+				reader.onerror = function(event) {
+					console.error("Файл не может быть прочитан! код " + event.target.error.code);
+				};
+				reader.readAsText(files[i]);
+			}
+		 
+		}, false);
+		
+
+		</script>
     </body>
 </html>
