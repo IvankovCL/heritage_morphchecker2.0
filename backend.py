@@ -18,10 +18,17 @@ flask_app = Flask(__name__)
 def do_some_morphchecking(text):
     m = Morphchecker()
     results = m.text_mcheck(text)
-    return " ".join([result[0]
+
+    to_save = ''
+    for result in results:
+        to_save += str(result) + '\n'
+
+    to_show = " ".join([result[0]
                       if len(result[1]) == 1 and result[1][0][0] == 0
                       else '<error title="{0}">{1}</error>'.format("\n".join([r[1] for r in result[1]]), result[0])
                       for result in results])
+
+    return to_save, to_show
 
 @flask_app.route('/')
 def index():
@@ -32,10 +39,11 @@ def index():
 def data():
     request.get_data()
     given_text = request.data.decode('utf-8')
-    task_id = do_some_morphchecking(given_text)
+    to_save, to_show = do_some_morphchecking(given_text)
 
     return jsonify({
-            'result': str(task_id)
+            'to_show': to_show,
+            'to_save': to_save
     })
 
 if __name__ == '__main__':
