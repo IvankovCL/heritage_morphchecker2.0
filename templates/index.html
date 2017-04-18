@@ -28,26 +28,26 @@
             .container {
                 background-color : transparent;
             }
-			button {
-				float: right;
-			}
-			.col-md-3 {
-				padding-bottom: 10px;
-			}
+            button {
+                float: right;
+            }
+            .col-md-3 {
+                padding-bottom: 10px;
+            }
             .output {
-				width: 500px;
-				height: 210px;
-				overflow: scroll;
+                width: 500px;
+                height: 210px;
+                overflow: scroll;
                 float: left;
                 font-size: 15px;
-				padding-top: 6px;
+                padding-top: 6px;
             }
-			error {
+            error {
                 background-color: #F95050;
             }       
-			textarea {
-				resize: none;
-			}
+            textarea {
+                resize: none;
+            }
         </style>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
@@ -77,33 +77,33 @@
     <div class="jumbotron">    
         <h1 align="center">Morphchecker</h1>
         <p align="center">Сервис для обнаружения морфологических ошибок в текстах на русском языке</p>
-		<br />
+        <br />
         <div class="container">
-		    <div class="row">
-				<div class="col-md-3">
-				   <input type="file" id="openFile">
-				</div>
-				<div class="col-md-3">
-				   <button type="button" class="btn btn-default" id="send">Проверить</button>
-				   <button type="button" class="btn btn-default" id="clean"><span class="glyphicon glyphicon-trash"></span></button> 
-				   <button type="button" class="btn btn-default" title="Для проверки введите текст в поле слева или выберите файл в формате txt. Нажмите 'Проверить'.
+            <div class="row">
+                <div class="col-md-3">
+                   <input type="file" id="openFile">
+                </div>
+                <div class="col-md-3">
+                   <button type="button" class="btn btn-default" id="send">Проверить</button>
+                   <button type="button" class="btn btn-default" id="clean"><span class="glyphicon glyphicon-trash"></span></button> 
+                   <button type="button" class="btn btn-default" title="Для проверки введите текст в поле слева или выберите файл в формате txt. Нажмите 'Проверить'.
 Когда проверка будет закончена, в поле справа появится проверенный текст. 
 Слова, содержащие ошибки, будут подсвечены красным цветом.
 Варианты исправления можно увидеть, наведя курсор на интересующее слово.
-Последовательности символов, содержащие латиницу или цифры обработаны не будут."><span class="glyphicon glyphicon-question-sign"></span></button>				   
-				</div>
-				<div class="col-md-6">
-					<button type="button" class="btn btn-default" id="saveFile" disabled>Сохранить</button>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<textarea rows="10" cols="65" class="form-control" placeholder="введите текст или выберите файл" id="textInput"></textarea> 
-				</div>
-				<div class="col-md-6">          
-					<div class="output" id="textOutput"></div>              
-				</div>
-			</div>
+Последовательности символов, содержащие латиницу или цифры обработаны не будут."><span class="glyphicon glyphicon-question-sign"></span></button>                   
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-default" id="saveFile" disabled>Сохранить</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <textarea rows="10" cols="65" class="form-control" placeholder="введите текст или выберите файл" id="textInput"></textarea> 
+                </div>
+                <div class="col-md-6">          
+                    <div class="output" id="textOutput"></div>              
+                </div>
+            </div>
         </div>
     </div>    
     <div class="container">
@@ -113,29 +113,29 @@
     </div> <!-- /container -->        
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
         <script src="{{ url_for('static', filename='js/without_polling.js') }}"></script>
-		<script>
-		var control = document.getElementById("openFile");
-		control.addEventListener("change", function(event) {
-			var i = 0,
-				files = control.files,
-				len = files.length;		 
-			for (; i < len; i++) {
-				if (files[i].type.match('text/plain')) {			
-					var reader = new FileReader();
-					reader.onload = function(event) {
-						var contents = event.target.result;
-						document.getElementById("textInput").value = contents;
-					}; 
-					reader.onerror = function(event) {
-						console.error("Файл не может быть прочитан! код " + event.target.error.code);
-					};
-					reader.readAsText(files[i]);
-				} else {
-					window.alert('Поддерживаются только файлы в формате txt');
-					document.getElementById("openFile").value = '';
-				}
-			}
-		}, false);
-		</script>
+        <script>
+        var control = document.getElementById("openFile");
+        control.addEventListener("change", function(event) {
+            var i = 0,
+                files = control.files,
+                len = files.length;         
+            for (; i < len; i++) {
+                if (files[i].type.match('text/plain')) {            
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        var contents = event.target.result;
+                        document.getElementById("textInput").value = contents;
+                    }; 
+                    reader.onerror = function(event) {
+                        console.error("Файл не может быть прочитан! код " + event.target.error.code);
+                    };
+                    reader.readAsText(files[i]);
+                } else {
+                    window.alert('Поддерживаются только файлы в формате txt');
+                    document.getElementById("openFile").value = '';
+                }
+            }
+        }, false);
+        </script>
     </body>
 </html>
