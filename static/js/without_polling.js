@@ -1,5 +1,5 @@
 $(document).ready(function () {
-	document.title = 'Morphchecker';
+	document.title = "Morphchecker";
 	saveButton = document.getElementById("saveFile");
 	$("#clean").click(function() {
 		document.getElementById("textInput").value = '';
@@ -12,13 +12,23 @@ $(document).ready(function () {
 		saveButton.disabled = true;		
 	});
 	$("#send").click(function() {
+		document.getElementById("textOutput").innerHTML = 'Проверка началась. Это займёт некоторое время...';
+		document.title = "Идёт проверка...";
 		$.post('/data', $("#textInput").val(), function(data) {
-			document.getElementById("textOutput").innerHTML = data.to_show;
-			resultToSave = data.to_save;
+			if (data.to_show == "none") {
+				document.title = "Morphchecker";
+				window.alert("В ходе проверки что-то пошло не так!");
+				document.getElementById("textOutput").innerHTML = '';
+			} else {
+				document.getElementById("textOutput").innerHTML = data.to_show;
+				document.title = "Morphchecker";
+				window.alert("Текст проверен!");
+				resultToSave = data.to_save;
+			}
 		});
 	});
 	$("body").on('DOMSubtreeModified', "#textOutput", function() {
-		saveButton.disabled = false; 
+		saveButton.disabled = false;		
 	});
 	$("#saveFile").click(function() {
 		  var blob = new Blob([resultToSave], {

@@ -39,7 +39,13 @@ def index():
 def data():
     request.get_data()
     given_text = request.data.decode('utf-8')
-    to_save, to_show = do_some_morphchecking(given_text)
+    try:
+        to_save, to_show = do_some_morphchecking(given_text)
+    except:
+        return jsonify({
+            'to_show': 'none',
+            'to_save': ''
+        })
 
     return jsonify({
             'to_show': to_show,
