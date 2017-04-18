@@ -10,10 +10,14 @@ from rules import context_rules
 from prjscript import morphSplitnCheck, kuznec
 from collections import defaultdict, namedtuple
 
+def print(*args):
+    pass
+
 Rule = namedtuple('Rule', ['old', 'new', 'condition', 'gram'])
 
 class Rulebook:
-    """Модуль для работы со словарями Hunspell
+    """
+    Модуль для работы со словарями Hunspell
 
     Файл ru_RU.dic содержит список лемм, каждой из которых приписано множество двухбуквенных кодов,
     каждый код указывает на множество правил постановки леммы во все возможные морфологические формы.
@@ -369,31 +373,40 @@ class Morphchecker:
                 for token in text if token not in string.punctuation]
 
     def text_mcheck(self, text):
-        return [(word, self.mcheck(word)) for word in self.tokenize(text)]
+        """Морфчек каждого токена в тексте, не включающего символов латиницы и цифр"""
+        results = []
+        for word in self.tokenize(text):
+            if re.search('[0-9A-z]+', word) is None:
+                try:
+                    results.append((word, self.mcheck(word)))
+                except:
+                    results.append((word, [(1, 'не обрабатывалось')]))
+                    continue
+            else:
+                results.append((word, [(1, 'не обрабатывалось')]))
 
-    def file_mcheck(self, filename1, filename2):
+        return results
+
+
+        """return [
+                if re.search('[0-9A-z]+', word) is None
+                else (word, [(1, 'не обрабатывалось')])
+                for word in self.tokenize(text)]"""
+
+    def file_mcheck(self, input_file, output_file):
+        """
+        Применяет функцию text_mcheck к тексту файла input_file
+        Результат выводит в файл output_file
+        """
         import io
-        with open(filename1, 'r', encoding='utf-8') as f1:
+        with open(input_file, 'r', encoding='utf-8') as f1:
             mchecked = self.text_mcheck(f1.read())
             
-        f2 = open(filename2, 'w', encoding='utf-8')
+        f2 = open(output_file, 'w', encoding='utf-8')
         for m in mchecked:
             f2.write(str(m)+'\n')
         f2.close()
 
-    def test(self):
-
-        with open('ttrue_examples.txt', 'r', encoding='utf-8') as test:
-            all_words = [entry.strip('\n') for entry in test]
-            results = {word: self.mcheck(word) for word in all_words}
-
-        with open('test_with_new_delilk.txt', 'w', encoding='utf-8') as output:
-            for result in results:
-                output.write(result + ' ' + str(results[result]) + '\n')
-
-        print('DONE')
-
-pass
 
 def options(argv):
     """
@@ -411,8 +424,6 @@ def options(argv):
     option 2:
     --log       enable logs
     """
-
-
 
     if len(argv) > 2:
         m = Morphchecker()
@@ -432,4 +443,3 @@ if __name__ == '__main__':
         def print(*args):
             pass
     options(sys.argv)
-

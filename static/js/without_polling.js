@@ -1,15 +1,15 @@
 $(document).ready(function () {
 	document.title = 'Morphchecker';
-	$('#demoButton').click(function () {
-		 $(this).hide();
-		 $('#demoForm').show();
-	});
-	$('#demoForm').hide();
-	if ($("#textInput").val() == '') {
+	$("#clean").click(function() {
+		document.getElementById("textInput").value = '';
 		document.getElementById("textOutput").innerHTML = '';
-	}
+		document.getElementById("openFile").value = '';
+	});
+	$("#textInput").keydown(function () {
+		document.getElementById("textOutput").innerHTML = '';	
+	});
 	$("#send").click(function() {
-		$.post('/data', $('#textInput').val(), function(data) {
+		$.post('/data', $("#textInput").val(), function(data) {
 			document.getElementById("textOutput").innerHTML = data.result
 		});
 	});

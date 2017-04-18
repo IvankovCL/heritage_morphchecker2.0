@@ -61,7 +61,7 @@ def context_rules(word):
             suggest.append(x)
         elif len(asp) >= 2:
             suggest += asp[:2]
-    print('context rules:', set(suggest))
+    # print('context rules:', set(suggest))
     return set(suggest)
 
 

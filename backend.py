@@ -15,15 +15,13 @@ import re
 
 flask_app = Flask(__name__)
 
-def do_some_morphchecking(word):
+def do_some_morphchecking(text):
     m = Morphchecker()
-    results = m.text_mcheck(word)
+    results = m.text_mcheck(text)
     return " ".join([result[0]
                       if len(result[1]) == 1 and result[1][0][0] == 0
-                      else '<error title="{0}">{1}</error>'.format("\n".join([str(r) for r in result[1]]), result[0])
+                      else '<error title="{0}">{1}</error>'.format("\n".join([r[1] for r in result[1]]), result[0])
                       for result in results])
-
-
 
 @flask_app.route('/')
 def index():
@@ -37,7 +35,7 @@ def data():
     task_id = do_some_morphchecking(given_text)
 
     return jsonify({
-         'result': str(task_id)
+            'result': str(task_id)
     })
 
 if __name__ == '__main__':

@@ -182,7 +182,7 @@ def check_boundaries(word, prev_w, next_w):
             new.append(x)
         else:
             new += suggestions[:2]
-            print(x, '->aspell', suggestions)
+            # print(x, '->aspell', suggestions)
 
     for p in 'что или ли же бы'.split(' '):
         if word.endswith(p) and len(p) > 0:
