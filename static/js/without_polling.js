@@ -1,7 +1,10 @@
 $(document).ready(function () {
 	
 	document.title = "Morphchecker";
-	saveButton = document.getElementById("saveFile");
+	
+	$("#help").click(function() {
+		window.alert("Для проверки введите текст в поле слева или выберите файл в формате txt. Нажмите 'Проверить'. \nКогда проверка будет закончена, в поле справа появится проверенный текст. \nСлова, содержащие ошибки, будут подсвечены красным цветом.\nВарианты исправления можно увидеть, наведя курсор на интересующее слово.\nПоследовательности символов, содержащие латиницу или цифры обработаны не будут.");
+	});
 	
 	$("#clean").click(function() {
 		document.getElementById("textInput").value = '';
@@ -31,7 +34,7 @@ $(document).ready(function () {
 				document.title = "Morphchecker";
 				window.alert("Текст проверен!");
 				resultToSave = data.to_save;
-				saveButton.disabled = false;
+				document.getElementById("saveFile").disabled = false;
 				enableAll();
 			}
 		});
@@ -89,7 +92,7 @@ $(document).ready(function () {
 	
 	function cleanOutput() {
 		document.getElementById("textOutput").innerHTML = '';
-		saveButton.disabled = true;
+		document.getElementById("saveFile").disabled = true;
 	}
 	
 });
