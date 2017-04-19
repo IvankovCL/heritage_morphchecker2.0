@@ -11,7 +11,6 @@ except ImportError:
 
 from flask import Flask, render_template, request, jsonify
 from morphchecker import Morphchecker
-import re
 
 flask_app = Flask(__name__)
 
@@ -34,6 +33,9 @@ def do_some_morphchecking(text):
 def index():
     return render_template('index.html')
 
+@flask_app.route('/about')
+def about():
+    return render_template('about.html')
 
 @flask_app.route('/data', methods=['GET', 'POST'])
 def data():
@@ -42,6 +44,7 @@ def data():
     try:
         to_save, to_show = do_some_morphchecking(given_text)
     except:
+
         return jsonify({
             'to_show': 'none',
             'to_save': ''

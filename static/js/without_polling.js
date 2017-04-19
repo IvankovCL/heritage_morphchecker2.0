@@ -1,35 +1,66 @@
 $(document).ready(function () {
+	
 	document.title = "Morphchecker";
 	saveButton = document.getElementById("saveFile");
+	
 	$("#clean").click(function() {
 		document.getElementById("textInput").value = '';
-		document.getElementById("textOutput").innerHTML = '';
 		document.getElementById("openFile").value = '';
-		saveButton.disabled = true;
+		cleanOutput();
 	});
-	$("#textInput").keydown(function () {
-		document.getElementById("textOutput").innerHTML = '';
-		saveButton.disabled = true;		
+	
+	$("#textInput").keydown(function (e) {
+		if(e.which == 8 || e.which == 46){ 
+			document.getElementById("openFile").value = '';
+			cleanOutput();
+		}			
 	});
+	
 	$("#send").click(function() {
 		document.getElementById("textOutput").innerHTML = 'Проверка началась. Это займёт некоторое время...';
 		document.title = "Идёт проверка...";
+		disableAll();
 		$.post('/data', $("#textInput").val(), function(data) {
 			if (data.to_show == "none") {
 				document.title = "Morphchecker";
 				window.alert("В ходе проверки что-то пошло не так!");
 				document.getElementById("textOutput").innerHTML = '';
+				enableAll();
 			} else {
 				document.getElementById("textOutput").innerHTML = data.to_show;
 				document.title = "Morphchecker";
 				window.alert("Текст проверен!");
 				resultToSave = data.to_save;
+				saveButton.disabled = false;
+				enableAll();
 			}
 		});
 	});
-	$("body").on('DOMSubtreeModified', "#textOutput", function() {
-		saveButton.disabled = false;		
-	});
+	
+	var control = document.getElementById("openFile");
+	control.addEventListener("change", function(event) {
+		var i = 0,
+			files = control.files,
+			len = files.length;         
+		for (; i < len; i++) {
+			if (files[i].type.match('text/plain')) {            
+				var reader = new FileReader();
+				reader.onload = function(event) {
+					var contents = event.target.result;
+					document.getElementById("textInput").value = contents;
+					cleanOutput();					
+				}; 
+				reader.onerror = function(event) {
+					console.error("Файл не может быть прочитан! код " + event.target.error.code);
+				};
+				reader.readAsText(files[i]);
+			} else {
+				window.alert('Поддерживаются только файлы в формате txt');
+				document.getElementById("openFile").value = '';
+			}
+		}
+	}, false);	
+	
 	$("#saveFile").click(function() {
 		  var blob = new Blob([resultToSave], {
 			"type": "application/json"
@@ -41,4 +72,24 @@ $(document).ready(function () {
 		  a.click();
 		  document.body.removeChild(a);
 	});
+	
+	function disableAll() {
+		document.getElementById("textInput").readOnly = true;
+		document.getElementById("send").disabled = true;
+		document.getElementById("clean").disabled = true;
+		document.getElementById("openFile").disabled = true;
+	}
+
+	function enableAll() {
+		document.getElementById("textInput").readOnly = false;
+		document.getElementById("send").disabled = false;
+		document.getElementById("clean").disabled = false;
+		document.getElementById("openFile").disabled = false;
+	}
+	
+	function cleanOutput() {
+		document.getElementById("textOutput").innerHTML = '';
+		saveButton.disabled = true;
+	}
+	
 });
