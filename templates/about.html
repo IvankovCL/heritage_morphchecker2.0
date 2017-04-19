@@ -1,0 +1,143 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+		<!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+        <style>
+            
+            
+            body {
+                padding-top: 30px;
+                padding-bottom: 5px;
+                background-color: white;
+                background: url(static/blurredbackground29.jpg) no-repeat center center fixed;
+                -webkit-background-size: cover;
+                -moz-background-size: cover;
+                -o-background-size: cover;
+                background-size: cover;
+            }
+            .container {
+                background-color : transparent;
+            }
+			button {
+				float: right;
+			}
+			.col-md-3 {
+				padding-bottom: 10px;
+			}
+            .output {
+				width: 500px;
+				height: 210px;
+				overflow: scroll;
+                float: left;
+                font-size: 15px;
+				padding-top: 6px;
+            }
+			error {
+                background-color: #F95050;
+            }       
+			textarea {
+				resize: none;
+			}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+		</style>
+
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+		
+		<header class="navbar navbar-inverse navbar-fixed-top bs-docs-nav" role="banner">
+  <div class="container">
+    <div class="navbar-header">
+      <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <a href="index.html" class="navbar-brand">Heritage Morphchecker</a>
+    </div>
+    <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+      <ul class="nav navbar-nav">
+	  
+              <li><a href="about.html">О проекте</a></li>
+    </nav>
+  </div>
+</header>
+<br />
+	    <div class="container">
+		    <h1 align="left">О проекте</h1>
+            <p align="left">Сервис для обнаружения морфологических ошибок в текстах на русском языке, разработанный для Русского учебного корпуса.
+			В функции программы входит проверка сочетаемости морфем и поиск вариантов исправления ошибок.</p>
+
+<p>Команда
+<ul style="list-style-type:none">
+  <li>Александр Иванков</li>
+  <li>Роберт Закоян</li>
+  <li>Ольга Рамзайцева</li>
+</ul>
+</p>
+
+<p>Кураторы
+<ul style="list-style-type:none">
+  <li>Екатерина Владимировна Рахилина</li>
+  <li>Алина Ладыгина</li>
+  <li>Анастасия Выренкова</li>
+</ul>
+</p>
+
+<p>Исходный код доступен в <a href="https://github.com/IvankovCL/heritage_morphchecker2.0">репозитории</a> проекта.
+			</p>
+			</div>
+		<hr>
+   <div class="container">
+      <footer>
+        <p><a href="http://www.web-corpora.net/RLC/search/">&copy; Русский учебный корпус</p>
+      </footer>
+    </div> <!-- /container -->        
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='js/without_polling.js') }}"></script>
+		<script>
+		var control = document.getElementById("openFile");
+		control.addEventListener("change", function(event) {
+			var i = 0,
+				files = control.files,
+				len = files.length;		 
+			for (; i < len; i++) {
+				if (files[i].type.match('text/plain')) {			
+					var reader = new FileReader();
+					reader.onload = function(event) {
+						var contents = event.target.result;
+						document.getElementById("textInput").value = contents;
+					}; 
+					reader.onerror = function(event) {
+						console.error("Файл не может быть прочитан! код " + event.target.error.code);
+					};
+					reader.readAsText(files[i]);
+				} else {
+					window.alert('Поддерживаются только файлы в формате txt');
+					document.getElementById("openFile").value = '';
+				}
+			}
+		}, false);
+		</script>
+	</body>
+</html>
