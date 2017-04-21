@@ -56,4 +56,4 @@ def data():
     })
 
 if __name__ == '__main__':
-    flask_app.run(port=getuid() + ADDITIVE_FOR_UID, debug=True)
+    flask_app.run(port=getuid() + ADDITIVE_FOR_UID)
